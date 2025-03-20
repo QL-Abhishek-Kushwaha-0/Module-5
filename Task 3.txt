@@ -1,0 +1,51 @@
+	Base Architecture of Blog Application
+------------------------------------------------------
+
+	1. Database Setup
+		-> Data/ApplicationDbContext.cs			: "Configuring Database"
+
+	2. Authentication
+		-> Model/Entities/User.cs				: Schema Definition for User
+
+		-> DTO/RegisterDto.cs					: DTO for User Registration
+		-> DTO/LoginDto.cs						: DTO for User Login
+
+		-> Controller/AuthController.cs			: APIs for User Registration, Login
+		-> Services/IAuthService.cs				: Auth Services Interface
+		-> Services/AuthService.cs				: Auth Services Implementation
+
+	2. User
+		-> Model/Entities/User.cs				: Schema Definition for User
+
+		-> Controller/UserController.cs			: User APIs
+		-> Services/IUserService.cs				: User Services Interface
+		-> Services/UserService.cs				: User Services Implementation
+
+	3. Category
+		-> Model/Entities/Category.cs			: Schema Definition for Category
+		
+		-> DTO/CategoryDto.cs					: DTO for creating Categories
+
+		-> Controller/CategoryController.cs		: APIs related to Category
+		-> Services/ICategoryService.cs			: Catgegory Services Interface
+		-> Services/CategoryService.cs			: Category Services Implementation
+
+	4. Post
+		-> Model/Entities/Post.cs				: Schema for Post
+
+		-> DTO/PostDto.cs							: DTO for Creating Posts
+
+		-> Controller/PostController.cs			: APIs related to Post
+		-> Services/IPostService.cs				: Post Service Interface
+		-> Services/PostService.cs				: Post Services Implementation
+
+	5. Like
+		-> Model/Entities/Like.cs
+
+	6. Comment
+		-> Model/Entities/Comment.cs
+
+		-> DTO/CommentDto.cs					: DTO for posting Comments
+
+	7. Subscription
+		-> Model/Entities/Subscription.cs
