@@ -1,0 +1,175 @@
+	Database Schema and Models for Blog Application Backend
+-----------------------------------------------------------------------------------------------------------------------------------
+			-> In order to build a Blog Application we will be requiring following Models
+
+					1. User			(Will classify based on roles -> "User" or "Author")
+					2. Category		(Represent Category of Blog Post)
+					3. Post			(Schema for the Blog Post)
+					4. Like			(Will store who liked which post)
+					5. Comment		(Will Stor who commented what on which post)
+					6. Subscribe	(This will store which "User" subscribed which "Author")
+
+---------------------------------------------------------------------------------------------------------------------------------------
+	# Data Schema Diagrams
+	 ------------------------------------
+		-> This Diagram shows the realtionships between Tables alongside with their attributes.
+
+		1. Data Schema Diagram for Blog Application -> https://quokkalabsllp-my.sharepoint.com/:i:/g/personal/abhishek_kushwaha_quokkalabs_com/EQAs9M6P0WJBqan-r6CiTgQB3RXjE0EEcXymvLzR3om8NQ?e=V7J0ao
+		2. SQL Specific Data Schema Diagram for App -> https://quokkalabsllp-my.sharepoint.com/:i:/g/personal/abhishek_kushwaha_quokkalabs_com/ER5cUzwvEftNvcWWTAKDnvEBe5ossi-n9ScOWZlbxQc-dQ?e=IZBsOO
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+	# Models / Entities Required for Blog Application
+	 ------------------------------------------------------
+		1. User
+		-----------------
+			-> User Entity will be first and most important entity in Blog Application.
+			-> This will contain two types of users namely :
+					1. "Author"
+					2. "Viewer"
+
+			-> The distinction between Author and Viewer will be created using "Role" attribute in the User Model.
+
+			-> It will store information as Name, Email, Username, Password in Hashed Format.
+
+			-> SQL Table Schema Creation
+			  --------------------------
+				CREATE TABLE Users (
+					id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+					name VARCHAR(50) NOT NULL,
+					email VARCHAR(50) NOT NULL,
+					username VARCHAR(50) NOT NULL,
+					role VARCHAR(10) NOT NULL DEFAULT 'Viewer'
+				);
+
+	-----------------------------------------------------------------------------------------------------------------------------------
+		2. Category
+		-------------------
+			-> Next entity to be created will be Category.
+			-> It will store the categories of Blog Post that will be created by the "Author".
+
+			-> Since a single "Author" will be able to create multiple Categories.
+			-> This implies that User table will have Many to One relationship with Category Table
+
+			-> Database Relationship -> One to Many  (Users [1 : M] Category)
+
+			-> As the Relationship will be one to many so Category Table will have the foreign key as "AuthorId" referencing to Id in Users Table
+
+			-> It will store information as Category Name as "name". 
+
+			-> SQL Table Schema Creation
+			  ---------------------------
+				CREATE TABLE Categories (
+					id INT PRIMARY KEY IDENTITY(1, 1),
+					name VARCHAR(50) NOT NULL
+				);
+
+			-> This will act as a base for Creating multiple posts under a Single Category.
+
+	---------------------------------------------------------------------------------------------------------------------------------------------------
+		3. Post
+		---------------------
+			-> Next Entity to be created will be Post.
+			-> It will be used for creating Posts that will belong to a category created by the "Author".
+			-> Multiple Posts would be created under a single category
+
+			-> As A single Category can have multiple posts but Single Post cannot have multiple categories.
+			-> This implies that it will have a Many to One with Category as well as User.
+
+			-> Database Relationship
+					* One to Many (Users [1 : M] Posts)
+					* One to Many (Category [1 : M] Posts)
+
+			-> As the Relationship will be one to many so Posts Table will have the foreign keys as "AuthorId" and CategoryId
+			   which will be referencing to Id in Users Table and Category Table to which the Post Belongs to.
+
+			-> It will store information as Title, Content, Banner Image and a boolean attribute for publishing and unpublishing the post.
+			-> Also Foreign Keys as "AuthorId" and "CategoryId".
+
+			-> SQL Table Schema Creation
+			  ---------------------------
+				CREATE TABLE Posts (
+					id INT PRIMARY KEY IDENTITY(1, 1),
+					title VARCHAR(50) NOT NULL,
+					content VARCHAR(350) NOT NULL,
+					banner_image VARCHAR(350),
+					is_published BOOLEAN NOT NULL DEFAULT FALSE,
+					author_id INT NOT NULL,
+					category_id INT NOT NULL,
+					FOREIGN KEY (author_id) REFERENCES Users(id),
+					FOREIGN KEY (category_id) REFERENCES Categories(id)
+				);
+
+	----------------------------------------------------------------------------------------------------------------------------------------------------
+		4. Like
+		-------------
+			-> Next Entity will be Like Table.
+			-> This Table will act as a "Junction Table" for establishing Many to Many Relationship between "Viewers" and "Posts".
+
+			-> As a Viewer can Like Multiple Post and a Single Post can also have likes of Multiple Users.
+			-> So it will be a Many to Many Relationship.
+
+			-> Database Relationship
+				* Many to Many -> Users (1 : M) Likes (M : 1) Posts
+
+			-> As Like Table act as a Junction Table for Users and Posts so it will have a Composite Key Comprising of Primary Key from Users 
+				and Primary key from the Post Table.
+
+			-> SQL Table Schema Creation
+			  ---------------------------------
+				CREATE TABLE Like (
+					user_id UNIQUEIDENTIFIER NOT NULL,
+					post_id INT NOT NULL,
+					PRIMARY KEY (UserId, PostId),
+					FOREIGN KEY (user_id) REFERENCES User(Id),
+					FOREIGN KEY (post_id) REFERENCES Post(Id)
+				);
+
+	-----------------------------------------------------------------------------------------------------------------------------------------------------
+		5. Comment
+		 --------------
+			-> Next Entity will be Comment Table.
+			-> Similar to Like Table, it will also establish Many to Many relationship between Viewers and Posts but will not act as Junction Table.
+			-> It will be because it will be having its own independent attribute.
+
+			-> Database Relationship
+				* Many to Many -> (Users [M : 1] Comment [1 : M] Posts)
+
+			-> It will have content_of_comment along with Foreign keys as UserId and PostId
+
+			-> SQL Table Schema Creation
+			  -----------------------------------
+				CREATE TABLE Comment (
+					id INT PRIMARY KEY IDENTITY(1, 1),
+					text VARCHAR(200) NOT NULL,
+					user_id UNIQUEIDENTIFIER NOT NULL,
+					post_id INT NOT NULL,
+					FOREIGN KEY (user_id) REFERENCES Users(Id),
+					FOREIGN KEY (post_id) REFERENCES Posts(Id)
+				);
+
+	-------------------------------------------------------------------------------------------------------------------------------------------------------
+		6. Subscription
+		 ------------------
+			-> Next Entity will be the Subscription Table.
+			-> This table will act as a "Junction Table" for establishing a Many-to-Many Relationship between Users (Subscribers) and Creators (Subscribed Users).
+			-> A User can subscribe to multiple Creators, and a Creator can have multiple Subscribers.
+			-> So, this represents a Many-to-Many Relationship.
+
+			-> Database Relationship
+				* Many to Many -> Users (1 : M) Subscriptions (M : 1) Users (Creators)
+
+			-> SQL Table Schema Creation
+			  -----------------------------------
+				CREATE TABLE Subscription (
+					subscriber_id UNIQUEIDENTIFIER NOT NULL,
+					creator_id UNIQUEIDENTIFIER NOT NULL,
+					PRIMARY KEY (subscriber_id, creator_id),
+					FOREIGN KEY (subscriber_id) REFERENCES Users(Id),
+					FOREIGN KEY (creator_id) REFERENCES Users(Id)
+				);
+
+
+
+
+
