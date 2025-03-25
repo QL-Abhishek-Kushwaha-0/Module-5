@@ -1,9 +1,19 @@
-﻿using Blog_Application.Logging;
-using Blog_Application.Middlewares;
+﻿using Blog_Application.Middlewares;
 using Serilog;
 using Serilog.Events;
+using Blog_Application.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Getting Connection String
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Database Connection
+builder.Services.AddDbContext<ApplicationDbContext>(
+    options => options.UseSqlServer(connectionString));
+
+//Console.WriteLine($"Connection String: {connectionString}");
 
 // Serilog Configuration
 builder.Host.UseSerilog((context, services, config) =>
