@@ -1,14 +1,7 @@
-﻿using Blog_Application.Data;
-using Blog_Application.DTO;
-using Blog_Application.Models.Entities;
+﻿using Blog_Application.DTO.RequestDTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BCrypt.Net;
 using Blog_Application.Middlewares;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
+using Blog_Application.Services;
 
 namespace Blog_Application.Controllers
 {
@@ -16,97 +9,40 @@ namespace Blog_Application.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _config;
-
-        public AuthController(ApplicationDbContext context, IConfiguration config)
+        private readonly IAuthService _authService;
+        
+        public AuthController(IAuthService authService)
         {
-            _context = context;
-            _config = config;
+            _authService = authService;
         }
 
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
+            var registerResponse = await _authService.Register(registerDto);
 
-            if (existingUser != null)
+            if (registerResponse == null)
             {
-                return Conflict(new { Response = new ApiResponse(false, 409, "User already exists!!!!") });
+                return Conflict(new ApiResponse(false, 409, "User already exists!!!"));
             }
 
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
-
-            var newUser = new User
-            {
-                Name = registerDto.Name,
-                Email = registerDto.Email,
-                Password = hashedPassword,
-                Username = registerDto.Username,
-                Role = registerDto.Role
-            };
-
-            _context.Users.Add(newUser);
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                response = new ApiResponse(true, 200, "User Registered Successfully!!!!"),
-                data = new { newUser.Name, newUser.Email, newUser.Username }
-            });
+            return Ok(new ApiResponse(true, 200, "User Registered Successfully!!!!", registerResponse));
         }
+
 
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+            var loginResponse = await _authService.Login(loginDto);
 
-            if (existingUser == null)
+            if (loginResponse == null)
             {
-                return NotFound(new { response = new ApiResponse(false, 404, "No User Found!!!") });
+                return NotFound(new ApiResponse(false, 404, "Invalid Email or Password!!!!"));
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, existingUser.Password))
-            {
-                return Unauthorized(new { response = new ApiResponse(false, 401, "Unauthorized Access!!!") });
-            }
-
-            var token = GenerateJwtToken(existingUser.Name, existingUser.Email, existingUser.Role);
-            return Ok(new
-            {
-                response = new ApiResponse(true, 200, "Logged In Successfully....."),
-                JwtToken = token,
-                data = new { existingUser.Name, existingUser.Email, existingUser.Username }
-            });
-        }
-
-
-        // Method to Generate the JWT Token
-        private string GenerateJwtToken(string name, string email, UserRole role)
-        {
-            var jwtSettings = _config.GetSection("JwtSettings");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            string roleStr = Convert.ToString(role) ?? "";
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.Name, name),
-                new(ClaimTypes.Email, email),
-                new(ClaimTypes.Role, roleStr)
-            };
-
-            var token = new JwtSecurityToken(
-                    issuer: jwtSettings["Issuer"],
-                    audience: jwtSettings["Audience"],
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiryMinutes"])),
-                    signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return Ok(new ApiResponse(true, 200, "Logged In Successfully....", loginResponse));
         }
     }
 }

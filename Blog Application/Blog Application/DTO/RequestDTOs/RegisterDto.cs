@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Blog_Application.Models.Entities;
 
-namespace Blog_Application.DTO
+namespace Blog_Application.DTO.RequestDTOs
 {
     public class RegisterDto
     {

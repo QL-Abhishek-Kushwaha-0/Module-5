@@ -1,4 +1,4 @@
-﻿namespace Blog_Application.DTO
+﻿namespace Blog_Application.DTO.LoggingDTOs
 {
     public class RequestDetails
     {

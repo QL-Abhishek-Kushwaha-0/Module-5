@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Blog_Application.DTO
+namespace Blog_Application.DTO.RequestDTOs
 {
     public class LoginDto
     {
