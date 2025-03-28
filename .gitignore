@@ -1,0 +1,5 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Blog Application/Blog Application/token.json/Google.Apis.Auth.OAuth2.Responses.TokenResponse-user

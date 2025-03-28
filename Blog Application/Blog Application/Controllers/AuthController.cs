@@ -1,36 +1,48 @@
-﻿using Blog_Application.Middlewares;
-using Blog_Application.Utils;
+﻿using Blog_Application.DTO.RequestDTOs;
 using Microsoft.AspNetCore.Mvc;
+using Blog_Application.Middlewares;
+using Blog_Application.Services;
 
 namespace Blog_Application.Controllers
 {
-
-
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private static Dictionary<int, string> Blogs = new()
+        private readonly IAuthService _authService;
+        
+        public AuthController(IAuthService authService)
         {
-            { 1, "Understanding .NET Middleware" },
-            { 2, "Building REST APIs with ASP.NET Core" }
-        };
+            _authService = authService;
+        }
 
-        // Example  API for testing the Logging and Exception Handling   
-        [HttpGet("{id}")]
-        public IActionResult GetBlogById(int id)
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            if (!Blogs.ContainsKey(id))
+            var registerResponse = await _authService.Register(registerDto);
+
+            if (registerResponse == null)
             {
-                throw new GlobalException(); // This will be caught by ExceptionMiddleware
+                return Conflict(new ApiResponse(false, 409, "User already exists!!!"));
             }
-            
-            return Ok(new
-            {
-                response = new ApiResponse(true, 200, "Blog Fetched Successfully!!!"),
-                data = new { id, title = Blogs[id] }
-            });
 
+            return Ok(new ApiResponse(true, 200, "User Registered Successfully!!!!", registerResponse));
+        }
+
+
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            var loginResponse = await _authService.Login(loginDto);
+
+            if (loginResponse == null)
+            {
+                return NotFound(new ApiResponse(false, 404, "Invalid Email or Password!!!!"));
+            }
+
+            return Ok(new ApiResponse(true, 200, "Logged In Successfully....", loginResponse));
         }
     }
 }

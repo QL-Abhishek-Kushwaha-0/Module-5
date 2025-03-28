@@ -3,6 +3,11 @@ using Serilog;
 using Serilog.Events;
 using Blog_Application.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Blog_Application.Utils;
+using Blog_Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +32,34 @@ builder.Host.UseSerilog((context, services, config) =>
         .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10);
 });
 
+// Implementing JWT Auhtentication and Authorization
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");      // Getting JWT Settings
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+
+//Console.WriteLine($"{key} {jwtSettings["Key"]}");
+
+// Registering the Authentication Service for JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<EmailService>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -35,7 +68,10 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware fo
 app.UseMiddleware<ExceptionHandlingMiddleware>();               // Middleware for Handling the Exceptions
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();    // Used to Enable the JWT Authentication
 app.UseAuthorization();
+
 app.MapControllers();
 
 // Test route

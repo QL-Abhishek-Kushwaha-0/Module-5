@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
-using Blog_Application.DTO;
+using Blog_Application.DTO.LoggingDTOs;
 using Serilog;
 
 namespace Blog_Application.Middlewares
