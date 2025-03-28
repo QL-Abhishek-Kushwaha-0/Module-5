@@ -17,6 +17,8 @@
 mono_crash.*
 
 appsettings.json/appsettings.Development.json
+Blog Application/token.json/Google.Apis.Auth.OAuth2.Responses.TokenResponse-user
+Blog Application/client_secrets.json
 
 # Build results
 [Dd]ebug/
@@ -36,6 +38,7 @@ bld/
 [Ll]ogs/
 
 appsettings.Development.json
+client_secrets.json
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
