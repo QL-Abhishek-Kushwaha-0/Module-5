@@ -29,6 +29,8 @@ namespace Blog_Application.Middlewares
                 await _next(context);           // Calls the next Middleware (Here the Exception Handling Middleware) in the Application Execution Pipeline
 
                 var responseDetails = await GetResponseDetails(context);        // Fetches the Response Details
+
+                requestDetails.User = context.User.Identity.IsAuthenticated ? context.User.Identity.Name: "Anonymous User (Not Logged In)";
                 var executionTime = stopwatch.Elapsed.TotalSeconds;             // Calculates the Time taken by Api form Request to Response
 
                 // Custom Logger (Serilog) to log the Information of API Request Response in a customized Format

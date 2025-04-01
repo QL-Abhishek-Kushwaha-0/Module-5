@@ -15,6 +15,11 @@ namespace Blog_Application.Middlewares
         { 
             await _next(context);
 
+            if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+            {
+                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, "Please login first!!!!"));
+            }
+
             if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
             {
                 await context.Response.WriteAsJsonAsync(new ApiResponse(false, 403, "Only Authors are allowed to Create Category!!!!"));

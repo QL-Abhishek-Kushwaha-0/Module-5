@@ -29,6 +29,22 @@ namespace Blog_Application.Services
 
             return categories;
         }
+
+        public async Task<CategoryResponseDto> GetCategoryById(int categoryId)
+        {
+            var categoryRes = await _context.Categories.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == categoryId);
+
+            if (categoryRes == null) return null;
+
+            var category = new CategoryResponseDto
+            {
+                CategoryId = categoryId,
+                CategoryName = categoryRes.Name,
+                AuthorName = categoryRes.Author.Name
+            };
+
+            return category;
+        }
         public async Task<Category> CreateCategory(CategoryDto categoryDto, Guid authorId)
         {
             var existingCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Name.Equals(categoryDto.Name));
@@ -41,6 +57,28 @@ namespace Blog_Application.Services
             await _context.SaveChangesAsync();
 
             return newCategory;
+        }
+
+
+        public async Task<CategoryResponseDto> UpdateCategory(CategoryDto categoryDto, int categoryId, Guid authorId)
+        {
+            var category = await _context.Categories.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == categoryId);
+
+            if (category == null) return null;
+            if (category.AuthorId != authorId) return null;
+
+            category.Name = categoryDto.Name;
+
+            await _context.SaveChangesAsync();
+
+            var categoryRes = new CategoryResponseDto
+            {
+                CategoryId = categoryId,
+                CategoryName = categoryDto.Name,
+                AuthorName = category.Author.Name
+            };
+
+            return categoryRes;
         }
 
         public async Task<string> DeleteCategory(int categoryId, Guid authorId)
