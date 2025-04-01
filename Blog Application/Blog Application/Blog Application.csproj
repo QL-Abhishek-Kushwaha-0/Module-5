@@ -35,7 +35,6 @@
 
   <ItemGroup>
     <Folder Include="DTO\LoggingDTOs\" />
-    <Folder Include="DTO\ResponseDTOs\" />
     <Folder Include="DTO\RequestDTOs\" />
   </ItemGroup>
 

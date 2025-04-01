@@ -48,7 +48,9 @@ namespace Blog_Application.Services
 
             if (!PasswordHasher.VerifyPassword(loginDto.Password, existingUser.Password)) return null;
 
-            var token = JwtTokenGenerator.GenerateJwtToken(_config, existingUser.Name, existingUser.Email, existingUser.Role);
+            string userId = Convert.ToString(existingUser.Id);
+
+            var token = JwtTokenGenerator.GenerateJwtToken(_config, userId, existingUser.Name, existingUser.Email, existingUser.Role);
 
             return new LoginResponseDto { Name = existingUser.Name, Email = existingUser.Email, Username = existingUser.Username, AuthToken = token };
         }

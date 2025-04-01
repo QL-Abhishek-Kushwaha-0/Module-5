@@ -8,7 +8,7 @@ namespace Blog_Application.Utils
 {
     public class JwtTokenGenerator
     {
-        public static string GenerateJwtToken(IConfiguration _config, string name, string email, UserRole role)
+        public static string GenerateJwtToken(IConfiguration _config, string userId, string name, string email, UserRole role)
         {
             var jwtSettings = _config.GetSection("JwtSettings");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
@@ -16,6 +16,7 @@ namespace Blog_Application.Utils
             string roleStr = Convert.ToString(role) ?? "";
             var claims = new List<Claim>
             {
+                new(ClaimTypes.NameIdentifier, userId),
                 new(ClaimTypes.Name, name),
                 new(ClaimTypes.Email, email),
                 new(ClaimTypes.Role, roleStr)

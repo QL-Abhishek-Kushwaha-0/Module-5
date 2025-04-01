@@ -58,6 +58,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddControllers();
@@ -65,6 +67,7 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware for Logging the Request Response  
+app.UseMiddleware<AuthorizationMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();               // Middleware for Handling the Exceptions
 
 app.UseHttpsRedirection();
