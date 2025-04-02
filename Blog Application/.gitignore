@@ -15,10 +15,9 @@
 
 # Mono auto generated files
 mono_crash.*
-
-appsettings.json/appsettings.Development.json
-Blog Application/token.json/Google.Apis.Auth.OAuth2.Responses.TokenResponse-user
-Blog Application/client_secrets.json
+/Blog Application/appsettings.Development.json
+/Blog Application/token.json/Google.Apis.Auth.OAuth2.Responses.TokenResponse-user
+/Blog Application/client_secret.json
 
 # Build results
 [Dd]ebug/
