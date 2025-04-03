@@ -3,6 +3,7 @@ using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.Helper;
 using Blog_Application.Middlewares;
 using Blog_Application.Models.Entities;
+using Blog_Application.Resources;
 using Blog_Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -28,7 +29,7 @@ namespace Blog_Application.Controllers
         {
             var posts = await _postService.GetAllPosts();
 
-            return Ok(new ApiResponse(true, 200, "Posts Successfully Fetched!!", posts));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
         }
 
 
@@ -39,7 +40,7 @@ namespace Blog_Application.Controllers
         {
             var posts = await _postService.GetCategoryPosts(categoryId);
 
-            return Ok(new ApiResponse(true, 200, "Successfully Fetched all Posts..", posts));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
         }
 
 
@@ -48,9 +49,9 @@ namespace Blog_Application.Controllers
         {
             var post = await _postService.GetPostById(postId);
 
-            if (post == null) return NotFound(new ApiResponse(false, 404, "No Such Post Found!!!"));
+            if (post == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
 
-            return Ok(new ApiResponse(true, 200, "Post Fetched Successfully...", post));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_FETCHED, post));
         }
 
 
@@ -62,15 +63,15 @@ namespace Blog_Application.Controllers
         {
             var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            if (authorIdRes == Guid.Empty) return NotFound(new ApiResponse(false, 404, "Invalid user!!!"));
+            if (authorIdRes == Guid.Empty) return NotFound(new ApiResponse(false, 404, ResponseMessages.INVALID_GUID));
 
             Guid authorId = authorIdRes;
 
             var updatedPost = await _postService.UpdatePost(postDto, postId, authorId);
 
-            if (updatedPost == null) return NotFound(new ApiResponse(false, 404, "No Such Post Found!!!"));
+            if (updatedPost == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
 
-            return Ok(new ApiResponse(true, 200, "Post Updated Successfully!!!!", updatedPost));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UPDATED, updatedPost));
         }
 
         // Api to Create a New Post
@@ -81,15 +82,15 @@ namespace Blog_Application.Controllers
         {
             var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            if (authorIdRes == Guid.Empty) return NotFound(new ApiResponse(false, 404, "No User Found!!!"));
+            if (authorIdRes == Guid.Empty) return NotFound(new ApiResponse(false, 404, ResponseMessages.INVALID_GUID));
 
             Guid authorId = authorIdRes;
 
             var category = await _postService.CreatePost(categoryId, postDto, authorId);
 
-            if (category == null) return NotFound(new ApiResponse(false, 404, "Invalid Request for Post Creation (Either Post already exists or Wrong Category!!!!"));
+            if (category == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.POST_CREATE_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Post Created Successfully!!!!", category));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_CREATED, category));
         }
 
         // Api to publish a post
@@ -101,11 +102,11 @@ namespace Blog_Application.Controllers
    
             var res = await _postService.PublishPost(postId, authorId);
 
-            if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, "No Post Found!!!"));
-            if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, "Only Post owners can publish the post!!!"));
-            if (res.Equals("AlreadyPublished")) return Conflict(new ApiResponse(false, 409, "Post is already Published!!!!"));
+            if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.PUBLISH_CONFLICT));
+            if (res.Equals("AlreadyPublished")) return Conflict(new ApiResponse(false, 409, ResponseMessages.PUBLISHED_POST_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Post is Published...."));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_PUBLISHED));
         }
 
 
@@ -118,11 +119,11 @@ namespace Blog_Application.Controllers
 
             var res = await _postService.UnpublishPost(postId, authorId);
 
-            if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, "No Post Found!!!"));
-            if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, "Only Post owners can unpublish the post!!!"));
-            if (res.Equals("NotPublishedYet")) return Conflict(new ApiResponse(false, 409, "Post is not yet Published!!!!"));
+            if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.UNPUBLISH_CONFLICT));
+            if (res.Equals("NotPublishedYet")) return Conflict(new ApiResponse(false, 409, ResponseMessages.UNPUBLISHED_POST_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Post is Unpublished....."));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UNPUBLISHED));
         }
 
 
@@ -135,16 +136,16 @@ namespace Blog_Application.Controllers
             var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
             if (authorIdRes == Guid.Empty)
             {
-                return BadRequest(new ApiResponse(false, 400, "Invalid User!!!"));
+                return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             }
             Guid authorId = authorIdRes;
 
             var result = await _postService.DeletePost(postId, authorId);
 
-            if (result.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, "No such Post Found!!!"));
-            if (result.Equals("InvalidAuthor")) return Conflict(new ApiResponse(false, 409, "Cannot delete Posts created by other Author!!!"));
+            if (result.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (result.Equals("InvalidAuthor")) return Conflict(new ApiResponse(false, 409, ResponseMessages.POST_DELETE_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Post Deleted Successfully!!!"));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_DELETE));
         }
     }
 }

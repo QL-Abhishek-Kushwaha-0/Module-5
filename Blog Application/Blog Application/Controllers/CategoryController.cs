@@ -4,6 +4,7 @@ using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.Helper;
 using Blog_Application.Middlewares;
 using Blog_Application.Models.Entities;
+using Blog_Application.Resources;
 using Blog_Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,9 +27,9 @@ namespace Blog_Application.Controllers
         {
             var categories = await _categoryService.GetAllCategories();
 
-            if (!categories.Any()) return NotFound(new ApiResponse(false, 404, "No Categories Found"));
+            if (!categories.Any()) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORIES));
 
-            return Ok(new ApiResponse(true, 200, "Categories Fetched Successfully!!!", categories));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORIES_FETCHED, categories));
         }
 
 
@@ -37,9 +38,9 @@ namespace Blog_Application.Controllers
         {
             var category = await _categoryService.GetCategoryById(categoryId);
 
-            if (category == null) return NotFound(new ApiResponse(false, 404, "No Such Category Found!!!"));
+            if (category == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
 
-            return Ok(new ApiResponse(true, 200, "Category Fetched Successfully...", category));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_FETCHED, category));
         }
 
 
@@ -52,7 +53,7 @@ namespace Blog_Application.Controllers
             
             if (authorIdRes == Guid.Empty)
             {
-                return BadRequest(new ApiResponse(false, 400, "Invalid Author!!!"));
+                return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             }
             Guid authorId = authorIdRes;
 
@@ -60,9 +61,9 @@ namespace Blog_Application.Controllers
 
             var newCategory = await _categoryService.CreateCategory(categoryDto, authorId);
 
-            if (newCategory == null) return Conflict(new ApiResponse(false, 409, "Category already exists."));
+            if (newCategory == null) return Conflict(new ApiResponse(false, 409, ResponseMessages.CATEGORY_EXISTS));
 
-            return Ok(new ApiResponse(true, 200, "Category created Successfully...", new { category_name = newCategory.Name, author_name = authorName }));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_CREATED, new { category_name = newCategory.Name, author_name = authorName }));
         }
 
 
@@ -71,14 +72,14 @@ namespace Blog_Application.Controllers
         public async Task<ActionResult<ApiResponse>> Update([FromBody] CategoryDto categoryDto, int categoryId)
         {
             var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (authorIdRes == Guid.Empty) return BadRequest(new ApiResponse(false, 400, "Invalid User!!!"));
+            if (authorIdRes == Guid.Empty) return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             Guid authorId = authorIdRes;
 
             var updatedCategory = await _categoryService.UpdateCategory(categoryDto, categoryId, authorId);
 
-            if (updatedCategory == null) return NotFound(new ApiResponse(false, 404, "No Such Category Found!!!"));
+            if (updatedCategory == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
 
-            return Ok(new ApiResponse(true, 200, "Category Updated Successfully!!!", updatedCategory));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_UPDATED, updatedCategory));
         }
 
 
@@ -89,16 +90,16 @@ namespace Blog_Application.Controllers
             var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
             if (authorIdRes == Guid.Empty)
             {
-                return BadRequest(new ApiResponse(false, 400, "Invalid User!!!"));
+                return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             }
             Guid authorId = authorIdRes;
 
             var res = await _categoryService.DeleteCategory(categoryId, authorId);
 
-            if (res.Equals("NoCategoryFound")) return NotFound(new ApiResponse(false, 404, "No such Category Found!!!"));
-            if (res.Equals("Unauthorized")) return Conflict(new ApiResponse(false, 409, "Cannot delete Categories created by other Author!!!"));
+            if (res.Equals("NoCategoryFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
+            if (res.Equals("Unauthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.CATEGORY_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Category Deleted Successfully...."));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_DELETE));
         }
     }
 }
