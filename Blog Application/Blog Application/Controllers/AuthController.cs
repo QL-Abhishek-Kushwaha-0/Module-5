@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Blog_Application.Middlewares;
 using Blog_Application.Services;
+using Blog_Application.Resources;
 
 namespace Blog_Application.Controllers
 {
@@ -24,10 +25,10 @@ namespace Blog_Application.Controllers
 
             if (registerResponse == null)
             {
-                return Conflict(new ApiResponse(false, 409, "User already exists!!!"));
+                return Conflict(new ApiResponse(false, 409, ResponseMessages.USER_EXISTS));
             }
 
-            return Ok(new ApiResponse(true, 200, "User Registered Successfully!!!!", registerResponse));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.USER_REGISTERED, registerResponse));
         }
 
 
@@ -39,10 +40,10 @@ namespace Blog_Application.Controllers
 
             if (loginResponse == null)
             {
-                return NotFound(new ApiResponse(false, 404, "Invalid Email or Password!!!!"));
+                return NotFound(new ApiResponse(false, 404, ResponseMessages.INVALID_CREDENTIALS));
             }
 
-            return Ok(new ApiResponse(true, 200, "Logged In Successfully....", loginResponse));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.LOGIN_SUCCESS, loginResponse));
         }
     }
 }
