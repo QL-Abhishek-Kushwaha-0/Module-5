@@ -1,6 +1,89 @@
-﻿namespace Blog_Application.Services
+﻿using System.Collections.ObjectModel;
+using Blog_Application.Data;
+using Blog_Application.DTO.ResponseDTOs;
+using Blog_Application.Enums;
+using Blog_Application.Models.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace Blog_Application.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
+        private readonly ApplicationDbContext _context;
+        public UserService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<SubscribeDto> Subscribe(Guid userId, Guid authorId)
+        {
+            var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
+            if (author == null)
+            {
+                return SubscribeDto.InvalidAuthor;
+            }
+
+            var existingSubscription = await _context.Subscriptions
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.AuthorId == authorId);
+
+            if (existingSubscription != null)
+            {
+                return SubscribeDto.AlreadySubscribed;
+            }
+
+            var subscription = new Subscription { UserId = userId, AuthorId = authorId };
+            _context.Subscriptions.Add(subscription);
+            await _context.SaveChangesAsync();
+
+            return SubscribeDto.Success;
+        }
+
+        public async Task<SubscribeDto> Unsubscribe(Guid userId, Guid authorId)
+        {
+            var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
+
+            if (author == null) return SubscribeDto.InvalidAuthor;
+
+            var existingSubscription = await _context.Subscriptions.FirstOrDefaultAsync(s => s.AuthorId == authorId && s.UserId == userId);
+
+            if (existingSubscription == null) return SubscribeDto.NotYetSubscribed;
+
+            _context.Subscriptions.Remove(existingSubscription);
+            await _context.SaveChangesAsync();
+
+            return SubscribeDto.Success;
+        }
+
+        public async Task<List<SubscriberDto>> GetSubscribers(Guid authorId)
+        {
+            var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
+
+            if (author == null) return null;
+
+            var subscribers = await _context.Subscriptions
+                .Where(s => s.AuthorId == authorId)
+                .Select(s => new SubscriberDto
+                {
+                    UserId = s.UserId,
+                    Username = s.User.Name
+                })
+                .ToListAsync();
+
+            return subscribers;
+        }
+
+        public async Task<List<SubscriptionDto>> GetSubscriptions(Guid userId)
+        {
+            var subscriptions = await _context.Subscriptions
+                .Where(s => s.UserId == userId)
+                .Select(s => new SubscriptionDto
+                {
+                    Id = s.Author.Id,
+                    Author = s.Author.Name
+                })
+                .ToListAsync();
+
+            return subscriptions;
+        }
     }
 }

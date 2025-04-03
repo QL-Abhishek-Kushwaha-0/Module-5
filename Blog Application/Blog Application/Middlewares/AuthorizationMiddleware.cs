@@ -15,14 +15,21 @@ namespace Blog_Application.Middlewares
         { 
             await _next(context);
 
-            if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
-            {
-                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, "Please login first!!!!"));
-            }
+            var endpoint = context.GetEndpoint();
+            var hasAuthorizeAttribute = endpoint?.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>() != null;
 
-            if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
+            // Run middleware logic only if the endpoint has [Authorize] attribute
+            if (hasAuthorizeAttribute)
             {
-                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 403, "Only Authors are allowed to Create Category!!!!"));
+                if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+                {
+                    await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, "Please login first!!!!"));
+                }
+
+                if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
+                {
+                    await context.Response.WriteAsJsonAsync(new ApiResponse(false, 403, "Only Authors are allowed to Create Category!!!!"));
+                }
             }
         }
     }
