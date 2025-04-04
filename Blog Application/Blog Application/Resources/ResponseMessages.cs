@@ -10,6 +10,7 @@
         public const string LOGIN_SUCCESS = "Logged In Successfully....";
 
         public const string INVALID_GUID = "Invalid User!!!";
+        public const string INVALID_AUTHOR = "Invalid Author!!!";
 
         // Category Related Messages
 
@@ -39,5 +40,36 @@
         public const string UNPUBLISHED_POST_CONFLICT = "Post has not yet been published!!!";
         public const string POST_DELETE_CONFLICT = "Cannot delete Posts created by other Author!!!";
         public const string POST_DELETE = "Post Deleted Successfully...";
+
+        // User Interaction Messages
+        public const string LOGIN_TO_INTERACT = "Please Login to Continue!!!!";
+        public const string LIKE_CONFLICT = "Post has already been Liked!!!!";
+        public const string UNLIKE_CONFLICT = "Post has not yet been Liked!!!!";
+        public const string LIKE_SUCCESS = "Post Liked Successfully...";
+        public const string UNLIKE_SUCCESS = "Post Unliked Successfully...";
+        public const string COMMENT_SUCCESS = "Commented Successfully...";
+        public const string COMMENT_DELETE_SUCCESS = "Comment Deleted Successfully...";
+        public const string COMMENT_NOT_FOUND = "No such Comment Found!!!";
+        public const string COMMENT_CONFLICT = "Cannot Delete Comment posted by others!!!!";
+        public const string COMMENTS_FETCHED = "Comments Fetched Successfully...";
+        public const string COMMENTS_NOT_FOUND = "No Comments Found for this Post!!!";
+
+        public const string SUBSCRIBERS_FETCHED = "Subscribers Fetched Successfully...";
+        public const string SUBSCRIPTIONS_FETCHED = "Subscriptions Fetched Successfully...";
+        public const string SUBSCRIBE_SELF_CONFLICT = "Cannot Subscribe to yourself!!!";
+        public const string SUBSCRIBE_SUCCESS = "Subscribed Successfully...";
+        public const string UNSUBSCRIBE_SUCCESS = "Unsubscribed Successfully...";
+        public const string INVALID_SUBSCRIBE = "Can only Subscribe to Authors!!!";
+        public const string SUBSCRIBE_CONFLICT = "Already Subscribed to this Author!!!";
+        public const string UNSUBSCRIBE_CONFLICT = "Not yet Subscribed to this Author!!!";
+
+        public const string SUBSCRIBER_CONFLICT = "Invalid Request!! Viewers cannot have subscribers!!!";
+        public const string SUBSCRIBER_FETCHED = "Subscribers Fetched Successfully...";
+
+        public const string SUBSCRIPTION_ACCESS_CONFLICT = "Cannot Access other user's subscriptions!!!";
+        public const string SUBSCRIPTION_FETCHED = "Subscriptions Fetched Successfully...";
+        public const string SUBSCRIPTION_CONFLICT = "You haven't Subscribed to any Author!!!";
+
+
     }
 }

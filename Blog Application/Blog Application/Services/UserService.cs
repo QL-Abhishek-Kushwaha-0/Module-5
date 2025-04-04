@@ -15,12 +15,12 @@ namespace Blog_Application.Services
             _context = context;
         }
 
-        public async Task<SubscribeDto> Subscribe(Guid userId, Guid authorId)
+        public async Task<SubscribeResponse> Subscribe(Guid userId, Guid authorId)
         {
             var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
             if (author == null)
             {
-                return SubscribeDto.InvalidAuthor;
+                return SubscribeResponse.InvalidAuthor;
             }
 
             var existingSubscription = await _context.Subscriptions
@@ -28,30 +28,30 @@ namespace Blog_Application.Services
 
             if (existingSubscription != null)
             {
-                return SubscribeDto.AlreadySubscribed;
+                return SubscribeResponse.AlreadySubscribed;
             }
 
             var subscription = new Subscription { UserId = userId, AuthorId = authorId };
             _context.Subscriptions.Add(subscription);
             await _context.SaveChangesAsync();
 
-            return SubscribeDto.Success;
+            return SubscribeResponse.Success;
         }
 
-        public async Task<SubscribeDto> Unsubscribe(Guid userId, Guid authorId)
+        public async Task<SubscribeResponse> Unsubscribe(Guid userId, Guid authorId)
         {
             var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
 
-            if (author == null) return SubscribeDto.InvalidAuthor;
+            if (author == null) return SubscribeResponse.InvalidAuthor;
 
             var existingSubscription = await _context.Subscriptions.FirstOrDefaultAsync(s => s.AuthorId == authorId && s.UserId == userId);
 
-            if (existingSubscription == null) return SubscribeDto.NotYetSubscribed;
+            if (existingSubscription == null) return SubscribeResponse.NotYetSubscribed;
 
             _context.Subscriptions.Remove(existingSubscription);
             await _context.SaveChangesAsync();
 
-            return SubscribeDto.Success;
+            return SubscribeResponse.Success;
         }
 
         public async Task<List<SubscriberDto>> GetSubscribers(Guid authorId)

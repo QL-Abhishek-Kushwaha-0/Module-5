@@ -1,6 +1,6 @@
 ﻿namespace Blog_Application.Enums
 {
-    public enum SubscribeDto
+    public enum SubscribeResponse
     {
         InvalidAuthor,
         AlreadySubscribed,

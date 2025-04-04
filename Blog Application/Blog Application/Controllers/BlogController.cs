@@ -3,6 +3,7 @@ using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.Enums;
 using Blog_Application.Helper;
 using Blog_Application.Middlewares;
+using Blog_Application.Resources;
 using Blog_Application.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,14 +26,14 @@ namespace Blog_Application.Controllers
         {
             var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, "Please Login First to Like the Post!!!"));
+            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.LikePost(postId, userIdRes);
 
-            if (result == LikeResponse.NotFound) return NotFound(new ApiResponse(false, 404, "Post Not Found!!!"));
-            if (result == LikeResponse.AlreadyLiked) return Conflict(new ApiResponse(false, 409, "Post has already been Liked!!!"));
+            if (result == LikeResponse.NotFound) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (result == LikeResponse.AlreadyLiked) return Conflict(new ApiResponse(false, 409, ResponseMessages.LIKE_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Post Liked Successfully..."));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.LIKE_SUCCESS));
         }
 
         [HttpDelete("unlike/{postId}")]
@@ -40,14 +41,14 @@ namespace Blog_Application.Controllers
         {
             var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, "Please Login First to Like the Post!!!"));
+            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.UnlikePost(postId, userIdRes);
 
-            if (result == LikeResponse.NotFound) return NotFound(new ApiResponse(false, 404, "Post Not Found!!!"));
-            if (result == LikeResponse.NotYetLiked) return Conflict(new ApiResponse(false, 409, "Post has not been Liked Yet!!!"));
+            if (result == LikeResponse.NotFound) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (result == LikeResponse.NotYetLiked) return Conflict(new ApiResponse(false, 409, ResponseMessages.UNLIKE_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Post unliked Successfully..."));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.UNLIKE_SUCCESS));
         }
 
         [HttpPost("comment/{postId}")]
@@ -55,13 +56,13 @@ namespace Blog_Application.Controllers
         {
             var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, "Login first to Comment!!!!"));
+            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.Comment(postId, userIdRes, commentDto);
 
-            if (result == null) return NotFound(new ApiResponse(false, 404, "No Post Found!!!!"));
+            if (result == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
 
-            return Ok(new ApiResponse(true, 200, "Commented Successfully...", result));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.COMMENT_SUCCESS, result));
         }
 
         [HttpDelete("{postId}/comment/{commentId}")]
@@ -69,14 +70,14 @@ namespace Blog_Application.Controllers
         {
             var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, "Login to Continue!!!"));
+            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.DeleteComment(postId, commentId, userIdRes);
 
-            if (result == CommentResponse.NotFound) return NotFound(new ApiResponse(false, 404, "No such Comment Found!!!"));
-            if (result == CommentResponse.Unauthorized) return Conflict(new ApiResponse(false, 409, "Cannot Delete Comment posted by others!!!!"));
+            if (result == CommentResponse.NotFound) return NotFound(new ApiResponse(false, 404, ResponseMessages.COMMENT_NOT_FOUND));
+            if (result == CommentResponse.Unauthorized) return Conflict(new ApiResponse(false, 409, ResponseMessages.COMMENT_CONFLICT));
 
-            return Ok(new ApiResponse(true, 200, "Comment Deleted Successfully..."));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.COMMENT_DELETE_SUCCESS));
         }
 
         [HttpGet("comment/{postId}")]
@@ -84,9 +85,9 @@ namespace Blog_Application.Controllers
         {
             var comments = await _blogService.GetPostComments(postId);
 
-            if(comments.Any() == false) return NotFound(new ApiResponse(false, 404, "No Comments Found for this Post!!!"));
+            if(comments.Any() == false) return NotFound(new ApiResponse(false, 404, ResponseMessages.COMMENTS_NOT_FOUND));
 
-            return Ok(new ApiResponse(true, 200, "Comments for this post fetched Successfully!!!", comments));
+            return Ok(new ApiResponse(true, 200, ResponseMessages.COMMENTS_FETCHED, comments));
         }
 
     }
