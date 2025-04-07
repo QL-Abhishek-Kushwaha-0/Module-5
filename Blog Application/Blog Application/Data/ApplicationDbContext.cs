@@ -18,13 +18,13 @@ namespace Blog_Application.Data
                 .HasOne(p => p.Category)
                 .WithMany(c => c.Posts)
                 .HasForeignKey(p => p.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull);  // Change from Cascade to SetNull
+                .OnDelete(DeleteBehavior.Restrict);  // Prevents deletion of category if it has posts
 
             modelBuilder.Entity<Post>()
                 .HasOne(p => p.Author)
                 .WithMany(u => u.Posts)
                 .HasForeignKey(p => p.AuthorId)
-                .OnDelete(DeleteBehavior.Restrict);  // Prevents cascade path conflicts
+                .OnDelete(DeleteBehavior.Restrict);  // Prevents deletion of user if it has posts
         }
     }
 }

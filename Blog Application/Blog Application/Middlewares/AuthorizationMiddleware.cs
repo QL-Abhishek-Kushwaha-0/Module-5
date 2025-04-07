@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Blog_Application.Resources;
 
 namespace Blog_Application.Middlewares
 {
@@ -17,12 +18,12 @@ namespace Blog_Application.Middlewares
 
             if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
             {
-                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, "Please login first!!!!"));
+                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, ResponseMessages.INVALID_LOGIN));
             }
 
             if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
             {
-                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 403, "Only Authors are allowed to Create Category!!!!"));
+                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 403, ResponseMessages.INVALID_AUTHOR));
             }
         }
     }
