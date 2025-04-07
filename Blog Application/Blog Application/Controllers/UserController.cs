@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Blog_Application.Enums;
 using Blog_Application.Helper;
-using Blog_Application.Middlewares;
+using Blog_Application.Utils;
 using Blog_Application.Resources;
 using Blog_Application.Services;
 using Microsoft.AspNetCore.Mvc;

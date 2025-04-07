@@ -1,6 +1,6 @@
 ﻿using Blog_Application.DTO.RequestDTOs;
 using Microsoft.AspNetCore.Mvc;
-using Blog_Application.Middlewares;
+using Blog_Application.Utils;
 using Blog_Application.Services;
 using Blog_Application.Resources;
 

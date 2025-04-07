@@ -1,4 +1,4 @@
-﻿namespace Blog_Application.Middlewares
+﻿namespace Blog_Application.Utils
 {
     public class ApiResponse
     {

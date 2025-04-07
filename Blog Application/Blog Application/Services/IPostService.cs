@@ -13,6 +13,8 @@ namespace Blog_Application.Services
 
         Task<PostResponseDto> UpdatePost(PostDto postDto, int postId, Guid authorId);
 
+        Task<string> UploadImage(int postId, IFormFile image, HttpRequest request);
+
         Task<string> PublishPost(int postId, Guid authorId);
         Task<string> UnpublishPost(int postId, Guid authorId);
         Task<string> DeletePost(int postId, Guid authorId);

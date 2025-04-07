@@ -94,19 +94,20 @@ namespace Blog_Application.Services
 
         public async Task<List<CommentResponseDto>> GetPostComments(int postId)
         {
-            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            var post = await _context.Posts
+                .Include(p => p.Comments!)
+                .ThenInclude(c => c.User)
+                .FirstOrDefaultAsync(p => p.Id == postId);
 
             if (post == null) return new List<CommentResponseDto>();
 
-            var comments = await _context.Comments
-                .Where(c => c.PostId == postId)
-                .Include(u => u.User)
+            var comments = post.Comments!
                 .Select(c => new CommentResponseDto
                 {
                     Content = c.Content,
                     Post = post.Title,
                     Username = c.User.Name
-                }).ToListAsync();
+                }).ToList();
 
             return comments;
         }

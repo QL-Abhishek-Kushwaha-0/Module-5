@@ -2,7 +2,7 @@
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.Enums;
 using Blog_Application.Helper;
-using Blog_Application.Middlewares;
+using Blog_Application.Utils;
 using Blog_Application.Resources;
 using Blog_Application.Services;
 using Microsoft.AspNetCore.Http;
@@ -85,7 +85,7 @@ namespace Blog_Application.Controllers
         {
             var comments = await _blogService.GetPostComments(postId);
 
-            if(comments.Any() == false) return NotFound(new ApiResponse(false, 404, ResponseMessages.COMMENTS_NOT_FOUND));
+            if(!comments.Any()) return NotFound(new ApiResponse(false, 404, ResponseMessages.COMMENTS_NOT_FOUND));
 
             return Ok(new ApiResponse(true, 200, ResponseMessages.COMMENTS_FETCHED, comments));
         }

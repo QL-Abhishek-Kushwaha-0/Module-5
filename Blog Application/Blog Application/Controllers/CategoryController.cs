@@ -1,8 +1,7 @@
 ﻿using System.Security.Claims;
-using System.Threading.Tasks;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.Helper;
-using Blog_Application.Middlewares;
+using Blog_Application.Utils;
 using Blog_Application.Models.Entities;
 using Blog_Application.Resources;
 using Blog_Application.Services;

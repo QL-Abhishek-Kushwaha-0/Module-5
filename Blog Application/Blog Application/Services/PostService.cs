@@ -1,7 +1,10 @@
 ﻿using Blog_Application.Data;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.DTO.ResponseDTOs;
+using Blog_Application.Helper;
 using Blog_Application.Models.Entities;
+using Blog_Application.Resources;
+using Blog_Application.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog_Application.Services
@@ -93,6 +96,25 @@ namespace Blog_Application.Services
             };
 
             return postRes;
+        }
+
+        public async Task<string> UploadImage(int postId, IFormFile image, HttpRequest request)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null) return "NoPostFound";
+
+            var fileName = await HelperFunctions.GetFileName(image);    // Will upload the image to images folder and return the name of the stored image
+
+            if (fileName.Equals("InvalidImage")) return fileName;
+
+            string imageUrl = $"{request.Scheme}://{request.Host}/images/{fileName}";
+
+            post.ImageUrl = imageUrl;
+
+            await _context.SaveChangesAsync();
+
+            return imageUrl;
         }
 
         public async Task<PostResponseDto> CreatePost(int categoryId, PostDto postDto, Guid authorId)

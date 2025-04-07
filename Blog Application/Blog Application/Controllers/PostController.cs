@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.Helper;
-using Blog_Application.Middlewares;
+using Blog_Application.Utils;
 using Blog_Application.Models.Entities;
 using Blog_Application.Resources;
 using Blog_Application.Services;
@@ -40,6 +40,8 @@ namespace Blog_Application.Controllers
         {
             var posts = await _postService.GetCategoryPosts(categoryId);
 
+            if (posts == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
+
             return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
         }
 
@@ -74,6 +76,24 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UPDATED, updatedPost));
         }
 
+
+        // API to upload the Image to Post
+
+        [Authorize(Roles = nameof(UserRole.Author))]
+        [HttpPatch("upload/image/{postId}")]
+        [HttpPost("image")]
+        public async Task<ActionResult<ApiResponse>> UploadImage(int postId, IFormFile image)
+        {
+            if (image == null || image.Length == 0) return BadRequest(new ApiResponse(false, 400, ResponseMessages.NO_IMAGE));
+
+            var imageUrlRes = await _postService.UploadImage(postId, image, Request);
+
+            if (imageUrlRes.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (imageUrlRes.Equals("InvalidImage")) return Conflict(new ApiResponse(false, 409, ResponseMessages.INVALID_IMAGE));
+
+            return Ok(new ApiResponse(true, 200, ResponseMessages.IMAGE_UPLOADED, new { imageUrlRes }));
+        }
+
         // Api to Create a New Post
 
         [Authorize(Roles = nameof(UserRole.Author))]
@@ -99,7 +119,7 @@ namespace Blog_Application.Controllers
         public async Task<ActionResult<ApiResponse>> Publish(int postId)
         {
             Guid authorId = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-   
+
             var res = await _postService.PublishPost(postId, authorId);
 
             if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));

@@ -70,6 +70,9 @@
         public const string SUBSCRIPTION_FETCHED = "Subscriptions Fetched Successfully...";
         public const string SUBSCRIPTION_CONFLICT = "You haven't Subscribed to any Author!!!";
 
+        public const string NO_IMAGE = "No Image Uploaded!!!";
+        public const string IMAGE_UPLOADED = "Image Uploaded Successfully...";
+        public const string INVALID_IMAGE = "Invalid Image Format!!!";
 
     }
 }

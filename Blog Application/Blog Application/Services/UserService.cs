@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Blog_Application.Data;
+﻿using Blog_Application.Data;
 using Blog_Application.DTO.ResponseDTOs;
 using Blog_Application.Enums;
 using Blog_Application.Models.Entities;
@@ -62,6 +61,7 @@ namespace Blog_Application.Services
 
             var subscribers = await _context.Subscriptions
                 .Where(s => s.AuthorId == authorId)
+                .Include(s => s.User)
                 .Select(s => new SubscriberDto
                 {
                     UserId = s.UserId,
@@ -74,16 +74,23 @@ namespace Blog_Application.Services
 
         public async Task<List<SubscriptionDto>> GetSubscriptions(Guid userId)
         {
-            var subscriptions = await _context.Subscriptions
-                .Where(s => s.UserId == userId)
+            var user = await _context.Users
+                .Include(a => a.Subscriptions!)
+                .ThenInclude(s => s.Author)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return null;
+
+            var subscriptions = user.Subscriptions!
                 .Select(s => new SubscriptionDto
                 {
                     Id = s.Author.Id,
                     Author = s.Author.Name
                 })
-                .ToListAsync();
+                .ToList();
 
             return subscriptions;
         }
+
     }
 }
