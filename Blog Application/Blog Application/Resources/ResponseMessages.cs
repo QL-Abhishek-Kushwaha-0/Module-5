@@ -10,6 +10,8 @@
         public const string LOGIN_SUCCESS = "Logged In Successfully....";
 
         public const string INVALID_GUID = "Invalid User!!!";
+        public const string INVALID_LOGIN = "Please Login to Continue!!!";
+        public const string INVALID_AUTHOR = "Only Authors are allowed to Create Category!!!!";
 
         // Category Related Messages
 
