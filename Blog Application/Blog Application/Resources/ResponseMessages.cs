@@ -11,6 +11,8 @@
 
         public const string INVALID_GUID = "Invalid User!!!";
         public const string INVALID_AUTHOR = "Invalid Author!!!";
+        public const string INVALID_LOGIN = "Please Login to Continue!!!";
+
 
         // Category Related Messages
 
