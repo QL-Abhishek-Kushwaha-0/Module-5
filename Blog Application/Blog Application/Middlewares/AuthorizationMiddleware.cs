@@ -29,7 +29,7 @@ namespace Blog_Application.Middlewares
 
                 if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
                 {
-                    await context.Response.WriteAsJsonAsync(new ApiResponse(false, 403, "Only Authors are allowed to Create Category!!!!"));
+                    await context.Response.WriteAsJsonAsync(new ApiResponse(false, 403, "You are not authorized to access this resource!!!!"));
                 }
             }
         }

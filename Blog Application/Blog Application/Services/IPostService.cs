@@ -7,6 +7,7 @@ namespace Blog_Application.Services
     public interface IPostService
     {
         Task<List<PostResponseDto>> GetAllPosts();
+        Task<List<PostResponseDto>> GetAuthorPosts(Guid authorId);
         Task<List<PostResponseDto>> GetCategoryPosts(int categoryId);
         Task<PostResponseDto> GetPostById(int postId);
         Task<PostResponseDto> CreatePost(int categoryId, PostDto postDto, Guid authorId);

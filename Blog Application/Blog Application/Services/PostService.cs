@@ -55,6 +55,24 @@ namespace Blog_Application.Services
             return posts;
         }
 
+        public async Task<List<PostResponseDto>> GetAuthorPosts(Guid authorId)
+        {
+            var user = await _context.Users.Include(a => a.Posts!).ThenInclude(c => c.Category).FirstOrDefaultAsync(a => a.Id == authorId);
+
+            if (user == null) return new List<PostResponseDto>();
+
+            var postList = user.Posts!.Select(p => new PostResponseDto
+            {
+                Title = p.Title,
+                Description = p.Description,
+                ImageUrl = p.ImageUrl ?? "",
+                Category = p.Category != null ? p.Category.Name : "Other",
+                Author = user.Name
+            }).ToList();
+
+            return postList;
+        }
+
         public async Task<PostResponseDto> GetPostById(int postId)
         {
             var post = await _context.Posts.Include(p => p.Category).Include(p => p.Author).FirstOrDefaultAsync(p => p.Id == postId);

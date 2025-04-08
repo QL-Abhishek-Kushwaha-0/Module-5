@@ -36,6 +36,7 @@
   <ItemGroup>
     <Folder Include="DTO\LoggingDTOs\" />
     <Folder Include="DTO\RequestDTOs\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

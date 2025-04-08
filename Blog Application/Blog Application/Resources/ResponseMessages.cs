@@ -29,6 +29,7 @@
         public const string POSTS_FETCHED = "Posts Fetched Successfully...";
         public const string POST_FETCHED = "Post Fetched Successfully...";
         public const string NO_POST = "No such Post Found!!!";
+        public const string NO_POSTS = "No Posts Found!!!";
         public const string POST_UPDATED = "Post Updated Successfully...";
         public const string POST_CREATE_CONFLICT = "Invalid Request for Post Creation (Either Post already exists or Wrong Category!!!!";
         public const string POST_CREATED = "Post Created Successfully...";

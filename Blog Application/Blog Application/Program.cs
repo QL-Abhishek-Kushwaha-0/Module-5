@@ -70,9 +70,10 @@ var app = builder.Build();
 
 app.UseStaticFiles();
 
-app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware for Logging the Request Response  
-app.UseMiddleware<AuthorizationMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();               // Middleware for Handling the Exceptions
+app.UseMiddleware<AuthorizationMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware for Logging the Request Response  
+
 
 app.UseHttpsRedirection();
 
@@ -81,7 +82,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Test route
 app.MapGet("/", () => "This is a Blog Application....");
 
 app.Run();

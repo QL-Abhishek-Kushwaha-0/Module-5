@@ -6,7 +6,6 @@ using Blog_Application.Models.Entities;
 using Blog_Application.Resources;
 using Blog_Application.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog_Application.Controllers
@@ -32,6 +31,16 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
         }
 
+        [Authorize(Roles = nameof(UserRole.Author))]
+        [HttpGet("users/{authorId:guid}")]
+        public async Task<ActionResult<ApiResponse>> GetAuthorPosts(Guid authorId)
+        {
+            var posts = await _postService.GetAuthorPosts(authorId);
+
+            if (!posts.Any()) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POSTS));
+
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
+        }
 
         // Api to Fetch all the Posts Under a Specific Category
 
