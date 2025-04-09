@@ -29,7 +29,6 @@ namespace Blog_Application.Services
 
             return categories;
         }
-
         public async Task<CategoryResponseDto> GetCategoryById(int categoryId)
         {
             var categoryRes = await _context.Categories.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == categoryId);
@@ -58,8 +57,6 @@ namespace Blog_Application.Services
 
             return newCategory;
         }
-
-
         public async Task<CategoryResponseDto> UpdateCategory(CategoryDto categoryDto, int categoryId, Guid authorId)
         {
             var category = await _context.Categories.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == categoryId);
@@ -80,7 +77,6 @@ namespace Blog_Application.Services
 
             return categoryRes;
         }
-
         public async Task<string> DeleteCategory(int categoryId, Guid authorId)
         {
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId);

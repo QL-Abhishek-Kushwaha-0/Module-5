@@ -1,7 +1,10 @@
 ﻿using Blog_Application.Data;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.DTO.ResponseDTOs;
+using Blog_Application.Helper;
 using Blog_Application.Models.Entities;
+using Blog_Application.Resources;
+using Blog_Application.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog_Application.Services
@@ -52,6 +55,24 @@ namespace Blog_Application.Services
             return posts;
         }
 
+        public async Task<List<PostResponseDto>> GetAuthorPosts(Guid authorId)
+        {
+            var user = await _context.Users.Include(a => a.Posts!).ThenInclude(c => c.Category).FirstOrDefaultAsync(a => a.Id == authorId);
+
+            if (user == null) return new List<PostResponseDto>();
+
+            var postList = user.Posts!.Select(p => new PostResponseDto
+            {
+                Title = p.Title,
+                Description = p.Description,
+                ImageUrl = p.ImageUrl ?? "",
+                Category = p.Category != null ? p.Category.Name : "Other",
+                Author = user.Name
+            }).ToList();
+
+            return postList;
+        }
+
         public async Task<PostResponseDto> GetPostById(int postId)
         {
             var post = await _context.Posts.Include(p => p.Category).Include(p => p.Author).FirstOrDefaultAsync(p => p.Id == postId);
@@ -93,6 +114,25 @@ namespace Blog_Application.Services
             };
 
             return postRes;
+        }
+
+        public async Task<string> UploadImage(int postId, IFormFile image, HttpRequest request)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null) return "NoPostFound";
+
+            var fileName = await HelperFunctions.GetFileName(image);    // Will upload the image to images folder and return the name of the stored image
+
+            if (fileName.Equals("InvalidImage")) return fileName;
+
+            string imageUrl = $"{request.Scheme}://{request.Host}/images/{fileName}";
+
+            post.ImageUrl = imageUrl;
+
+            await _context.SaveChangesAsync();
+
+            return imageUrl;
         }
 
         public async Task<PostResponseDto> CreatePost(int categoryId, PostDto postDto, Guid authorId)

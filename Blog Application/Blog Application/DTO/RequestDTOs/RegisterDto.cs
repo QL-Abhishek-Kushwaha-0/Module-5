@@ -1,23 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Blog_Application.Models.Entities;
+using Blog_Application.Resources;
 
 namespace Blog_Application.DTO.RequestDTOs
 {
     public class RegisterDto
     {
-        [MinLength(3, ErrorMessage ="Name length cannot be less than 3!!!!")]
-        [MaxLength(50)]
+        [MinLength(3, ErrorMessage =ResponseMessages.MIN_LENGTH)]
+        [MaxLength(50, ErrorMessage =ResponseMessages.MAX_NAME_LENGTH)]
         public required string Name { get; set; }
 
-        [EmailAddress(ErrorMessage ="Invalid Email Format!!!")]
+        [EmailAddress(ErrorMessage =ResponseMessages.INVALID_EMAIL)]
         public required string Email { get; set; }
 
-        [MinLength(8, ErrorMessage ="Password must be at least of legnth = 8!!!")]
+        [MinLength(8, ErrorMessage =ResponseMessages.INVALID_PASSWORD)]
         public required string Password { get; set; }
         public string Username { get; set; } = string.Empty;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public required UserRole Role { get; set; } = UserRole.Viewer;
+        public UserRole Role { get; set; } = UserRole.Viewer;
     }
 }
