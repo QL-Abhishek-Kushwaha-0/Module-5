@@ -18,15 +18,13 @@ namespace Blog_Application.Services
 
         public async Task<LikeResponse> LikePost(int postId, Guid userId)
         {
-            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            var postExists = await _context.Posts.AnyAsync(p => p.Id == postId && p.IsPublished == true);
 
-            if (post == null || post.IsPublished == false)
-                return LikeResponse.NotFound;
+            if (!postExists) return LikeResponse.NotFound;
 
-            var existingLike = await _context.Likes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
+            var existingLike = await _context.Likes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
 
-            if (existingLike != null)
-                return LikeResponse.AlreadyLiked;
+            if (existingLike) return LikeResponse.AlreadyLiked;
 
             var newLike = new Like
             {
@@ -42,9 +40,9 @@ namespace Blog_Application.Services
 
         public async Task<LikeResponse> UnlikePost(int postId, Guid userId)
         {
-            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            var postExists = await _context.Posts.AnyAsync(p => p.Id == postId && p.IsPublished == true);
 
-            if (post == null || post.IsPublished == false) return LikeResponse.NotFound;
+            if (!postExists) return LikeResponse.NotFound;
 
             var existingLike = await _context.Likes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
 

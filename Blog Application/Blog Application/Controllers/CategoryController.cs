@@ -21,16 +21,19 @@ namespace Blog_Application.Controllers
             _categoryService = categoryService;
         }
 
+        // API to get all Categories
+
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetAll()
         {
             var categories = await _categoryService.GetAllCategories();
 
-            if (!categories.Any()) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORIES));
+            if (!categories.Any()) return Ok(new ApiResponse(true, 200, ResponseMessages.NO_CATEGORY_CREATED));
 
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORIES_FETCHED, categories));
         }
 
+        // API to get a Specific Category
 
         [HttpGet("{categoryId}")]
         public async Task<ActionResult<ApiResponse>> Get(int categoryId)
@@ -42,10 +45,11 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_FETCHED, category));
         }
 
+        // API to create a category
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPost]
-        public async Task<ActionResult<ApiResponse>> Create([FromBody] CategoryDto categoryDto)
+        public async Task<ActionResult<ApiResponse>> Create(CategoryDto categoryDto)
         {
 
             var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
@@ -54,34 +58,35 @@ namespace Blog_Application.Controllers
             {
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             }
-            Guid authorId = authorIdRes;
 
             var authorName = User.FindFirst(ClaimTypes.Name)?.Value;
 
-            var newCategory = await _categoryService.CreateCategory(categoryDto, authorId);
+            var newCategory = await _categoryService.CreateCategory(categoryDto, authorIdRes);
 
             if (newCategory == null) return Conflict(new ApiResponse(false, 409, ResponseMessages.CATEGORY_EXISTS));
 
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_CREATED, new { category_name = newCategory.Name, author_name = authorName }));
         }
 
+        // API to update Category
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPut("{categoryId}")]
-        public async Task<ActionResult<ApiResponse>> Update([FromBody] CategoryDto categoryDto, int categoryId)
+        public async Task<ActionResult<ApiResponse>> Update(CategoryDto categoryDto, int categoryId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (authorIdRes == Guid.Empty) return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
-            Guid authorId = authorIdRes;
 
-            var updatedCategory = await _categoryService.UpdateCategory(categoryDto, categoryId, authorId);
+            var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+            if (authorIdRes == Guid.Empty)
+                return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
+
+            var updatedCategory = await _categoryService.UpdateCategory(categoryDto, categoryId, authorIdRes);
 
             if (updatedCategory == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
 
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_UPDATED, updatedCategory));
         }
 
-
+        // API to delte Category
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpDelete("{categoryId}")]
         public async Task<ActionResult<ApiResponse>> Delete(int categoryId)
@@ -91,9 +96,8 @@ namespace Blog_Application.Controllers
             {
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             }
-            Guid authorId = authorIdRes;
 
-            var res = await _categoryService.DeleteCategory(categoryId, authorId);
+            var res = await _categoryService.DeleteCategory(categoryId, authorIdRes);
 
             if (res.Equals("NoCategoryFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
             if (res.Equals("Unauthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.CATEGORY_CONFLICT));

@@ -6,8 +6,8 @@ using Blog_Application.Resources;
 
 namespace Blog_Application.Controllers
 {
+    [ApiController]     // This automatically validates the Incoming Model / Dto  & also binds Source inferences (No need to use [FromBody] or [FromQuery] attributes
     [Route("api/[controller]")]
-    [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -34,7 +34,7 @@ namespace Blog_Application.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
             var loginResponse = await _authService.Login(loginDto);
 

@@ -22,6 +22,7 @@
         public const string CATEGORY_FETCHED = "Category Fetched Successfully...";
         public const string CATEGORY_EXISTS = "Category already exists!!!";
         public const string CATEGORY_CREATED = "Category created Successfully...";
+        public const string NO_CATEGORY_CREATED = "No Categories are created yet!!!";
         public const string CATEGORY_UPDATED = "Category updated Successfully...";
         public const string CATEGORY_CONFLICT = "Cannot Delete Category created by other Author!!!";
         public const string CATEGORY_DELETE = "Category Deleted Successfully...";
@@ -32,6 +33,7 @@
         public const string POST_FETCHED = "Post Fetched Successfully...";
         public const string NO_POST = "No such Post Found!!!";
         public const string NO_POSTS = "No Posts Found!!!";
+        public const string NO_PUBLISHED_POSTS = "No Posts are published yet!!!";
         public const string POST_UPDATED = "Post Updated Successfully...";
         public const string POST_CREATE_CONFLICT = "Invalid Request for Post Creation (Either Post already exists or Wrong Category!!!!";
         public const string POST_CREATED = "Post Created Successfully...";
@@ -57,6 +59,8 @@
         public const string COMMENTS_FETCHED = "Comments Fetched Successfully...";
         public const string COMMENTS_NOT_FOUND = "No Comments Found for this Post!!!";
 
+
+        // Subscription Related Messages
         public const string SUBSCRIBERS_FETCHED = "Subscribers Fetched Successfully...";
         public const string SUBSCRIPTIONS_FETCHED = "Subscriptions Fetched Successfully...";
         public const string SUBSCRIBE_SELF_CONFLICT = "Cannot Subscribe to yourself!!!";
@@ -73,9 +77,18 @@
         public const string SUBSCRIPTION_FETCHED = "Subscriptions Fetched Successfully...";
         public const string SUBSCRIPTION_CONFLICT = "You haven't Subscribed to any Author!!!";
 
+        // Image Upload related messages
         public const string NO_IMAGE = "No Image Uploaded!!!";
         public const string IMAGE_UPLOADED = "Image Uploaded Successfully...";
         public const string INVALID_IMAGE = "Invalid Image Format!!!";
+
+        // DTO related messages
+        public const string MIN_LENGTH = "Should be at least 3 chalacters long!!!";
+        public const string MAX_LENGTH = "Should not exceed 20 characters!!!";
+        public const string MAX_NAME_LENGTH = "Should not be more that 50 characters!!!";
+        public const string INVALID_EMAIL = "Enter a Valid Email Address!!!!";
+        public const string INVALID_PASSWORD = "Password should be at least 8 characters long!!!";
+        public const string INVALID_URL = "Invalid URL!!!";
 
     }
 }

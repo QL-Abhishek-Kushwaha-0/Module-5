@@ -52,7 +52,7 @@ namespace Blog_Application.Controllers
         }
 
         [HttpPost("comment/{postId}")]
-        public async Task<ActionResult<ApiResponse>> Comment([FromBody] CommentDto commentDto, int postId)
+        public async Task<ActionResult<ApiResponse>> Comment(CommentDto commentDto, int postId)
         {
             var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
