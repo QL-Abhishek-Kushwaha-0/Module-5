@@ -4,15 +4,16 @@ using Blog_Application.DTO.ResponseDTOs;
 using Blog_Application.Models.Entities;
 using Blog_Application.Utils;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace Blog_Application.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly MongoDbContext _context;
         private readonly IConfiguration _config;
         private readonly EmailService _emailService;
-        public AuthService(ApplicationDbContext context, IConfiguration config, EmailService emailService)
+        public AuthService(MongoDbContext context, IConfiguration config, EmailService emailService)
         {
             _context = context;
             _config = config;
@@ -20,9 +21,9 @@ namespace Blog_Application.Services
         }
         public async Task<RegisterResponseDto> Register(RegisterDto registerDto)
         {
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
+            var existingUser = await _context.Users.Find(u => u.Email == registerDto.Email).AnyAsync();
 
-            if (existingUser != null) return null;
+            if (existingUser) return null;
 
             var newUser = new User
             {
@@ -33,8 +34,7 @@ namespace Blog_Application.Services
                 Role = registerDto.Role,
             };
 
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
+            await _context.Users.InsertOneAsync(newUser);
 
             await _emailService.SendMail(newUser.Email, newUser.Name);
 
@@ -42,7 +42,7 @@ namespace Blog_Application.Services
         }
         public async Task<LoginResponseDto> Login(LoginDto loginDto)
         {
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+            var existingUser = await _context.Users.Find(u => u.Email == loginDto.Email).FirstOrDefaultAsync();
 
             if (existingUser == null) return null;
 

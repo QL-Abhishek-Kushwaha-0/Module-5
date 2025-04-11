@@ -90,5 +90,7 @@
         public const string INVALID_PASSWORD = "Password should be at least 8 characters long!!!";
         public const string INVALID_URL = "Invalid URL!!!";
 
+        // Enforcing Heirarchical Relationship in Models
+        public const string HAVE_POSTS_CONFLICT = "Category cannot be deleted as there are posts associated with it!!!!";
     }
 }

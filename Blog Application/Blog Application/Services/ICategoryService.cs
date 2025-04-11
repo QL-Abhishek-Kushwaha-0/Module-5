@@ -6,11 +6,10 @@ namespace Blog_Application.Services
 {
     public interface ICategoryService
     {
-        Task<Category> CreateCategory(CategoryDto category, Guid authorId);
-        Task<string> DeleteCategory(int categoryId, Guid authorId);
+        Task<Category> CreateCategory(CategoryDto category, string authorId);
+        Task<string> DeleteCategory(string categoryId, string authorId);
+        Task<CategoryResponseDto> GetCategoryById(string categoryId);
+        Task<CategoryResponseDto> UpdateCategory(CategoryDto categoryDto, string categoryId, string authorId);
         Task<List<CategoryResponseDto>> GetAllCategories();
-        Task<CategoryResponseDto> GetCategoryById(int categoryId);
-
-        Task<CategoryResponseDto> UpdateCategory(CategoryDto categoryDto, int categoryId, Guid authorId);
     }
 }
