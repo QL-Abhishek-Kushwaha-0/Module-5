@@ -97,7 +97,6 @@ namespace Blog_Application.Controllers
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPatch("upload/image/{postId}")]
-        [HttpPost("image")]
         public async Task<ActionResult<ApiResponse>> UploadImage(int postId, IFormFile image)
         {
             if (image == null || image.Length == 0) return BadRequest(new ApiResponse(false, 400, ResponseMessages.NO_IMAGE));
