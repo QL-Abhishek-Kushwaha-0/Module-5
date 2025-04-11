@@ -1,10 +1,12 @@
 ﻿using Blog_Application.Data;
+using Blog_Application.DTO;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.DTO.ResponseDTOs;
 using Blog_Application.Helper;
 using Blog_Application.Models.Entities;
 using Blog_Application.Resources;
 using Blog_Application.Utils;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 
@@ -120,95 +122,126 @@ namespace Blog_Application.Services
             return imageUrl;
         }
 
-        //public async Task<List<PostResponseDto>> GetCategoryPosts(int categoryId)
-        //{
-        //    var posts = await _context.Posts
-        //        .Where(c => categoryId == c.CategoryId)
-        //        .Include(c => c.Category)
-        //        .Include(c => c.Author)
-        //        .Where(c => c.IsPublished == true)
-        //        .Select(c => new PostResponseDto
-        //        {
-        //            Title = c.Title,
-        //            Description = c.Description,
-        //            ImageUrl = c.ImageUrl ?? "",
-        //            Category = c.Category != null ? c.Category.Name : "Other",
-        //            Author = c.Author.Name
-        //        })
-        //        .ToListAsync();
+        public async Task<string> PublishPost(string postId, string authorId)
+        {
+            var post = await _context.Posts.Find(p => p.Id == postId).FirstOrDefaultAsync();
 
-        //    return posts;
-        //}
+            if (post == null) return "NoPostFound";
 
-        //public async Task<List<PostResponseDto>> GetAllPosts()
-        //{
-        //    var posts = await _context.Posts
-        //        .Include(p => p.Author)
-        //        .Include(p => p.Category)
-        //        .Where(p => p.IsPublished == true)
-        //        .Select(p => new PostResponseDto
-        //        {
-        //            Title = p.Title,
-        //            Description = p.Description,
-        //            ImageUrl = p.ImageUrl ?? "",
-        //            Category = p.Category != null ? p.Category.Name : "Other",
-        //            Author = p.Author.Name
-        //        })
-        //        .ToListAsync();
-        //    return posts;
-        //}
+            if (post.AuthorId != authorId) return "UnAuthorized";
 
-        //public async Task<List<PostResponseDto>> GetAuthorPosts(Guid authorId)
-        //{
-        //    var user = await _context.Users.Include(a => a.Posts!).ThenInclude(c => c.Category).FirstOrDefaultAsync(a => a.Id == authorId);
+            if (post.IsPublished == true) return "AlreadyPublished";
 
-        //    if (user == null) return new List<PostResponseDto>();
+            await _context.Posts.UpdateOneAsync(
+                Builders<Post>.Filter.Eq(p => p.Id, postId),
+                Builders<Post>.Update.Set(p => p.IsPublished, true)
+            );
 
-        //    var postList = user.Posts!.Select(p => new PostResponseDto
-        //    {
-        //        Title = p.Title,
-        //        Description = p.Description,
-        //        ImageUrl = p.ImageUrl ?? "",
-        //        Category = p.Category != null ? p.Category.Name : "Other",
-        //        Author = user.Name
-        //    }).ToList();
+            return "Success";
+        }
 
-        //    return postList;
-        //}
+        public async Task<string> UnpublishPost(string postId, string authorId)
+        {
+            var post = await _context.Posts.Find(p => p.Id == postId).FirstOrDefaultAsync();
 
+            if (post == null) return "NoPostFound";
 
-        //public async Task<string> PublishPost(int postId, Guid authorId)
-        //{
-        //    var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post.AuthorId != authorId) return "UnAuthorized";
 
-        //    if (post == null) return "NoPostFound";
+            if (post.IsPublished == false) return "NotPublishedYet";
 
-        //    if (post.AuthorId != authorId) return "UnAuthorized";
+            await _context.Posts.UpdateOneAsync(
+                Builders<Post>.Filter.Eq(p => p.Id, postId),
+                Builders<Post>.Update.Set(p => p.IsPublished, false)
+            );
 
-        //    if (post.IsPublished == true) return "AlreadyPublished";
+            return "Success";
+        }
 
-        //    post.IsPublished = true;
-        //    await _context.SaveChangesAsync();
-
-        //    return "Success";
-        //}
-
-        //public async Task<string> UnpublishPost(int postId, Guid authorId)
-        //{
-        //    var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
-
-        //    if (post == null) return "NoPostFound";
-
-        //    if (post.AuthorId != authorId) return "UnAuthorized";
-
-        //    if (post.IsPublished == false) return "NotPublishedYet";
-
-        //    post.IsPublished = false;
-        //    await _context.SaveChangesAsync();
-
-        //    return "Success";
-        //}
+        public async Task<List<PostResponseDto>> GetAllPosts()
+        {
+            var posts = await _context.Posts
+                .Aggregate()
+                .Match(p => p.IsPublished == true)
+                .Lookup<Post, Category, LookupClasses.PostWithCategory>(
+                    _context.Categories,
+                    p => p.CategoryId,
+                    c => c.Id,
+                    res => res.Category
+                )
+                .Lookup<LookupClasses.PostWithCategory, User, LookupClasses.PostWithAuthor>(
+                    _context.Users,
+                    wc => wc.AuthorId,
+                    u => u.Id,
+                    res => res.Author
+                )
+                .Project(p => new PostResponseDto
+                {
+                    Title = p.Title,
+                    Description = p.Description,
+                    ImageUrl = p.ImageUrl ?? "",
+                    Category = p.Category!.FirstOrDefault() != null ? p.Category!.FirstOrDefault()!.Name : "Others",
+                    Author = p.Author!.FirstOrDefault()! != null ? p.Author!.FirstOrDefault()!.Name : "Unknown"
+                })
+                .ToListAsync();
+            return posts;
+        }
 
 
+        public async Task<List<PostResponseDto>> GetAuthorPosts(string authorId)
+        {
+            var author = await _context.Users.Find(a => a.Id == authorId).FirstOrDefaultAsync();
+
+            if (author == null) return null;
+
+            var postList = await _context.Posts
+                .Aggregate()
+                .Match(p => p.AuthorId == authorId)
+                .Lookup<Post, Category, LookupClasses.PostWithCategory>(
+                    _context.Categories,
+                    p => p.CategoryId,
+                    c => c.Id,
+                    res => res.Category
+                )
+                .Project(p => new PostResponseDto
+                    {
+                        Title = p.Title,
+                        Description = p.Description,
+                        ImageUrl = p.ImageUrl ?? "",
+                        Category = p.Category != null ? p.Category.FirstOrDefault().Name : "Other",
+                        Author = author.Name
+                    }
+                )
+                .ToListAsync();
+
+            return postList;
+        }
+
+        public async Task<List<PostResponseDto>> GetCategoryPosts(string categoryId)
+        {
+            var category = await _context.Categories.Find(c => c.Id == categoryId).FirstOrDefaultAsync();
+            if (category == null) return null;
+
+            var posts = await _context.Posts
+                .Aggregate()
+                .Match(p => p.CategoryId == categoryId && p.IsPublished == true)
+                .Lookup<Post, User, LookupClasses.PostWithPostOwner>(
+                    _context.Users, 
+                    p => p.AuthorId,
+                    u => u.Id,
+                    res => res.Owner    
+                )
+                .Project(p => new PostResponseDto
+                {
+                    Title = p.Title,
+                    Description = p.Description,
+                    ImageUrl = p.ImageUrl ?? "",
+                    Category = category.Name,
+                    Author = p.Owner!.FirstOrDefault()!.Name
+                })
+                .ToListAsync();
+
+            return posts;
+        }
     }
 }

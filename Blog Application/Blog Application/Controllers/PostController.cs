@@ -104,82 +104,83 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.IMAGE_UPLOADED, new { imageUrlRes }));
         }
 
+        // Api to publish a post
+
+        [Authorize(Roles = nameof(UserRole.Author))]
+        [HttpPatch("{postId}/publish")]
+        public async Task<ActionResult<ApiResponse>> Publish(string postId)
+        {
+            var authorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (authorId == null) return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
+
+            var res = await _postService.PublishPost(postId, authorId);
+
+            if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.PUBLISH_CONFLICT));
+            if (res.Equals("AlreadyPublished")) return Conflict(new ApiResponse(false, 409, ResponseMessages.PUBLISHED_POST_CONFLICT));
+
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_PUBLISHED));
+        }
+
+        // API to unpublish a post
+
+        [Authorize(Roles = nameof(UserRole.Author))]
+        [HttpPatch("{postId}/unpublish")]
+        public async Task<ActionResult<ApiResponse>> Unpublish(string postId)
+        {
+            var authorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (authorId == null) return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
+
+            var res = await _postService.UnpublishPost(postId, authorId);
+
+            if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.UNPUBLISH_CONFLICT));
+            if (res.Equals("NotPublishedYet")) return Conflict(new ApiResponse(false, 409, ResponseMessages.UNPUBLISHED_POST_CONFLICT));
+
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UNPUBLISHED));
+        }
+
         // Api to get all Posts
 
-        //[HttpGet]
-        //public async Task<ActionResult<ApiResponse>> GetAll()
-        //{
-        //    var posts = await _postService.GetAllPosts();
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse>> GetAll()
+        {
+            var posts = await _postService.GetAllPosts();
 
-        //    if (!posts.Any()) return Ok(new ApiResponse(true, 200, ResponseMessages.NO_PUBLISHED_POSTS));
+            if (!posts.Any()) return Ok(new ApiResponse(true, 200, ResponseMessages.NO_POSTS));
 
-        //    return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
-        //}
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
+        }
 
 
         // API to get the posts of a specific author
 
-        //[Authorize(Roles = nameof(UserRole.Author))]
-        //[HttpGet("users/{authorId:guid}")]
-        //public async Task<ActionResult<ApiResponse>> GetAuthorPosts(Guid authorId)
-        //{
-        //    var posts = await _postService.GetAuthorPosts(authorId);    // Will always return a list 
+        [Authorize(Roles = nameof(UserRole.Author))]
+        [HttpGet("users/{authorId}")]
+        public async Task<ActionResult<ApiResponse>> GetAuthorPosts(string authorId)
+        {
+            var posts = await _postService.GetAuthorPosts(authorId);    // Will always return a list 
 
-        //    if (!posts.Any()) return Ok(new ApiResponse(true, 404, ResponseMessages.NO_PUBLISHED_POSTS));
+            if (posts == null) return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
+            if (!posts.Any()) return Ok(new ApiResponse(true, 404, ResponseMessages.NO_PUBLISHED_POSTS));
 
-        //    return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
-        //}
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
+        }
 
 
         // Api to Fetch all the Posts Under a Specific Category
 
-        //[HttpGet("category/{categoryId}")]
-        //public async Task<ActionResult<ApiResponse>> GetPosts(int categoryId)
-        //{
-        //    var posts = await _postService.GetCategoryPosts(categoryId);
+        [HttpGet("category/{categoryId}")]
+        public async Task<ActionResult<ApiResponse>> GetPosts(string categoryId)
+        {
+            var posts = await _postService.GetCategoryPosts(categoryId);
 
-        //    if (posts == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
+            if (posts == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
+            if (!posts.Any()) return Ok(new ApiResponse(true, 200, ResponseMessages.NO_POSTS));
 
-        //    return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
-        //}
-
-        // Api to publish a post
-
-        //[Authorize(Roles = nameof(UserRole.Author))]
-        //[HttpPatch("{postId}/publish")]
-        //public async Task<ActionResult<ApiResponse>> Publish(int postId)
-        //{
-        //    Guid authorId = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-
-        //    if (authorId == Guid.Empty) return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
-
-        //    var res = await _postService.PublishPost(postId, authorId);
-
-        //    if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
-        //    if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.PUBLISH_CONFLICT));
-        //    if (res.Equals("AlreadyPublished")) return Conflict(new ApiResponse(false, 409, ResponseMessages.PUBLISHED_POST_CONFLICT));
-
-        //    return Ok(new ApiResponse(true, 200, ResponseMessages.POST_PUBLISHED));
-        //}
-
-
-        // API to unpublish a post
-
-        //[Authorize(Roles = nameof(UserRole.Author))]
-        //[HttpPatch("{postId}/unpublish")]
-        //public async Task<ActionResult<ApiResponse>> Unpublish(int postId)
-        //{
-        //    Guid authorId = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-
-        //    if (authorId == Guid.Empty) return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
-
-        //    var res = await _postService.UnpublishPost(postId, authorId);
-
-        //    if (res.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
-        //    if (res.Equals("UnAuthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.UNPUBLISH_CONFLICT));
-        //    if (res.Equals("NotPublishedYet")) return Conflict(new ApiResponse(false, 409, ResponseMessages.UNPUBLISHED_POST_CONFLICT));
-
-        //    return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UNPUBLISHED));
-        //}
+            return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
+        }
     }
 }

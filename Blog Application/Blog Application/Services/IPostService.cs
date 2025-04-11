@@ -11,11 +11,10 @@ namespace Blog_Application.Services
         Task<PostResponseDto> UpdatePost(PostDto postDto, string postId, string authorId);
         Task<string> DeletePost(string postId, string authorId);
         Task<string> UploadImage(string postId, IFormFile image, HttpRequest request);
-        //Task<List<PostResponseDto>> GetAllPosts();
-        //Task<List<PostResponseDto>> GetAuthorPosts(Guid authorId);
-        //Task<List<PostResponseDto>> GetCategoryPosts(int categoryId);
-
-        //Task<string> PublishPost(int postId, Guid authorId);
-        //Task<string> UnpublishPost(int postId, Guid authorId);
+        Task<string> PublishPost(string postId, string authorId);
+        Task<string> UnpublishPost(string postId, string authorId);
+        Task<List<PostResponseDto>> GetAllPosts();
+        Task<List<PostResponseDto>> GetAuthorPosts(string authorId);
+        Task<List<PostResponseDto>> GetCategoryPosts(string categoryId);
     }
 }

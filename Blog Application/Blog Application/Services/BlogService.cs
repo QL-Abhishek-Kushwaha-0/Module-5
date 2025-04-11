@@ -1,113 +1,118 @@
-﻿//using Blog_Application.Data;
-//using Blog_Application.DTO.RequestDTOs;
-//using Blog_Application.DTO.ResponseDTOs;
-//using Blog_Application.Enums;
-//using Blog_Application.Models.Entities;
-//using Microsoft.EntityFrameworkCore;
+﻿using Blog_Application.Data;
+using Blog_Application.DTO;
+using Blog_Application.DTO.RequestDTOs;
+using Blog_Application.DTO.ResponseDTOs;
+using Blog_Application.Enums;
+using Blog_Application.Helper;
+using Blog_Application.Models.Entities;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
-//namespace Blog_Application.Services
-//{
-//    public class BlogService : IBlogService
-//    {
-//        private readonly ApplicationDbContext _context;
+namespace Blog_Application.Services
+{
+    public class BlogService : IBlogService
+    {
+        private readonly MongoDbContext _context;
 
-//        public BlogService(ApplicationDbContext context)
-//        {
-//            _context = context;
-//        }
+        public BlogService(MongoDbContext context)
+        {
+            _context = context;
+        }
 
-//        public async Task<LikeResponse> LikePost(int postId, Guid userId)
-//        {
-//            var postExists = await _context.Posts.AnyAsync(p => p.Id == postId && p.IsPublished == true);
+        public async Task<LikeResponse> LikePost(string postId, string userId)
+        {
+            var postExists = await _context.Posts.Find(p => p.Id == postId && p.IsPublished == true).AnyAsync();
 
-//            if (!postExists) return LikeResponse.NotFound;
+            if (!postExists) return LikeResponse.NotFound;
 
-//            var existingLike = await _context.Likes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
+            var existingLike = await _context.Likes.Find(l => l.PostId == postId && l.UserId == userId).AnyAsync();
 
-//            if (existingLike) return LikeResponse.AlreadyLiked;
+            if (existingLike) return LikeResponse.AlreadyLiked;
 
-//            var newLike = new Like
-//            {
-//                PostId = postId,
-//                UserId = userId
-//            };
+            var newLike = new Like
+            {
+                PostId = postId,
+                UserId = userId
+            };
 
-//            _context.Likes.Add(newLike);
-//            await _context.SaveChangesAsync();
+            await _context.Likes.InsertOneAsync(newLike);
 
-//            return LikeResponse.Success;
-//        }
+            return LikeResponse.Success;
+        }
 
-//        public async Task<LikeResponse> UnlikePost(int postId, Guid userId)
-//        {
-//            var postExists = await _context.Posts.AnyAsync(p => p.Id == postId && p.IsPublished == true);
+        public async Task<LikeResponse> UnlikePost(string postId, string userId)
+        {
+            var postExists = await _context.Posts.Find(p => p.Id == postId && p.IsPublished == true).AnyAsync();
 
-//            if (!postExists) return LikeResponse.NotFound;
+            if (!postExists) return LikeResponse.NotFound;
 
-//            var existingLike = await _context.Likes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
+            var existingLike = await _context.Likes.Find(l => l.PostId == postId && l.UserId == userId).FirstOrDefaultAsync();
 
-//            if (existingLike == null) return LikeResponse.NotYetLiked;
+            if (existingLike == null) return LikeResponse.NotYetLiked;
 
-//            _context.Likes.Remove(existingLike);
-//            await _context.SaveChangesAsync();
+            await _context.Likes.DeleteOneAsync(Builders<Like>.Filter.Eq(l => l.Id, existingLike.Id));
 
-//            return LikeResponse.Success;
-//        }
+            return LikeResponse.Success;
+        }
 
-//        public async Task<CommentResponseDto> Comment(int postId, Guid userId, CommentDto commentDto)
-//        {
-//            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+        public async Task<CommentResponseDto> Comment(string postId, string userId, CommentDto commentDto)
+        {
+            var post = await _context.Posts.Find(p => p.Id == postId).FirstOrDefaultAsync();
 
-//            if (post == null || post.IsPublished == false) return null;
+            if (post == null || post.IsPublished == false) return null;
 
-//            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _context.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
 
-//            var comment = new Comment
-//            {
-//                Content = commentDto.Content,
-//                PostId = postId,
-//                UserId = userId
-//            };
+            var comment = new Comment
+            {
+                Content = commentDto.Content,
+                PostId = postId,
+                UserId = userId
+            };
 
-//            _context.Comments.Add(comment);
-//            await _context.SaveChangesAsync();
+            await _context.Comments.InsertOneAsync(comment);
 
-//            return new CommentResponseDto { Content = commentDto.Content, Post = post.Title, Username = user == null ? "Unknown" : user.Name };
-//        }
+            return new CommentResponseDto { Content = commentDto.Content, Post = post.Title, Username = user == null ? "Unknown" : user.Name };
+        }
 
-//        public async Task<CommentResponse> DeleteComment(int postId, int commentId, Guid userId)
-//        {
-//            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
-//            var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
+        public async Task<CommentResponse> DeleteComment(string postId, string commentId, string userId)
+        {
+            var post = await _context.Posts.Find(p => p.Id == postId).FirstOrDefaultAsync();
+            var comment = await _context.Comments.Find(c => c.Id == commentId).FirstOrDefaultAsync();
 
-//            if (post == null || comment == null) return CommentResponse.NotFound;
+            if (post == null || comment == null) return CommentResponse.NotFound;
 
-//            if (comment.UserId != userId) return CommentResponse.Unauthorized;
+            if (comment.UserId != userId) return CommentResponse.Unauthorized;
 
-//            _context.Comments.Remove(comment);
-//            await _context.SaveChangesAsync();
+            await _context.Comments
+                .DeleteOneAsync(Builders<Comment>.Filter.Eq(c => c.Id, commentId));
 
-//            return CommentResponse.Success;
-//        }
+            return CommentResponse.Success;
+        }
 
-//        public async Task<List<CommentResponseDto>> GetPostComments(int postId)
-//        {
-//            var post = await _context.Posts
-//                .Include(p => p.Comments!)
-//                .ThenInclude(c => c.User)
-//                .FirstOrDefaultAsync(p => p.Id == postId);
+        public async Task<List<CommentResponseDto>> GetPostComments(string postId)
+        {
+            var post = await _context.Posts.Find(p => p.Id == postId).FirstOrDefaultAsync();
 
-//            if (post == null) return new List<CommentResponseDto>();
+            if (post == null) return null;
 
-//            var comments = post.Comments!
-//                .Select(c => new CommentResponseDto
-//                {
-//                    Content = c.Content,
-//                    Post = post.Title,
-//                    Username = c.User.Name
-//                }).ToList();
+            var comments = await _context.Comments
+                .Aggregate()
+                .Match(c => c.PostId == postId)
+                .Lookup<Comment, User, LookupClasses.CommentWithUser>(
+                    _context.Users,
+                    c => c.UserId,
+                    u => u.Id,
+                    res => res.Author
+                )
+                .Project(c => new CommentResponseDto
+                {
+                    Content = c.Content,
+                    Post = post.Title,
+                    Username = c.Author!.FirstOrDefault()!.Name
+                }).ToListAsync();
 
-//            return comments;
-//        }
-//    }
-//}
+            return comments;
+        }
+    }
+}

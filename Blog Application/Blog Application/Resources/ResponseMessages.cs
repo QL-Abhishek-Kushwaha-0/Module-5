@@ -58,6 +58,7 @@
         public const string COMMENT_CONFLICT = "Cannot Delete Comment posted by others!!!!";
         public const string COMMENTS_FETCHED = "Comments Fetched Successfully...";
         public const string COMMENTS_NOT_FOUND = "No Comments Found for this Post!!!";
+        public const string NO_COMMENTS = "There are no comments for this post yet!!!";
 
 
         // Subscription Related Messages

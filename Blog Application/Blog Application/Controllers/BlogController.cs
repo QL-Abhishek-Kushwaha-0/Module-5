@@ -22,11 +22,11 @@ namespace Blog_Application.Controllers
         }
 
         [HttpPost("like/{postId}")]
-        public async Task<ActionResult<ApiResponse>> Like(int postId)
+        public async Task<ActionResult<ApiResponse>> Like(string postId)
         {
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
+            if (userIdRes == null) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.LikePost(postId, userIdRes);
 
@@ -37,11 +37,11 @@ namespace Blog_Application.Controllers
         }
 
         [HttpDelete("unlike/{postId}")]
-        public async Task<ActionResult<ApiResponse>> Unlike(int postId)
+        public async Task<ActionResult<ApiResponse>> Unlike(string postId)
         {
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
+            if (userIdRes == null) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.UnlikePost(postId, userIdRes);
 
@@ -52,11 +52,11 @@ namespace Blog_Application.Controllers
         }
 
         [HttpPost("comment/{postId}")]
-        public async Task<ActionResult<ApiResponse>> Comment(CommentDto commentDto, int postId)
+        public async Task<ActionResult<ApiResponse>> Comment(CommentDto commentDto, string postId)
         {
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
+            if (userIdRes == null) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.Comment(postId, userIdRes, commentDto);
 
@@ -66,11 +66,11 @@ namespace Blog_Application.Controllers
         }
 
         [HttpDelete("{postId}/comment/{commentId}")]
-        public async Task<ActionResult<ApiResponse>> Delete(int postId, int commentId)
+        public async Task<ActionResult<ApiResponse>> Delete(string postId, string commentId)
         {
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userIdRes == Guid.Empty) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
+            if (userIdRes == null) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _blogService.DeleteComment(postId, commentId, userIdRes);
 
@@ -81,11 +81,12 @@ namespace Blog_Application.Controllers
         }
 
         [HttpGet("comment/{postId}")]
-        public async Task<ActionResult<ApiResponse>> GetComments(int postId)
+        public async Task<ActionResult<ApiResponse>> GetComments(string postId)
         {
             var comments = await _blogService.GetPostComments(postId);
 
-            if(!comments.Any()) return NotFound(new ApiResponse(false, 404, ResponseMessages.COMMENTS_NOT_FOUND));
+            if (comments == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (!comments.Any()) return Ok(new ApiResponse(true, 200, ResponseMessages.NO_COMMENTS));
 
             return Ok(new ApiResponse(true, 200, ResponseMessages.COMMENTS_FETCHED, comments));
         }

@@ -2,6 +2,7 @@
 using Blog_Application.DTO;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.DTO.ResponseDTOs;
+using Blog_Application.Helper;
 using Blog_Application.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
@@ -22,7 +23,7 @@ namespace Blog_Application.Services
             // Aggregation Based Fetching of Category and Author
 
             var categoryRes = await _context.Categories.Aggregate()
-                .Lookup<Category, User, WithAuthor>(
+                .Lookup<Category, User, LookupClasses.CategoryWithAuthor>(
                 _context.Users,
                 c => c.AuthorId,
                 u => u.Id,

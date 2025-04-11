@@ -20,14 +20,13 @@ namespace Blog_Application.Controllers
 
         // API to Subscribe to an Author
         [HttpPost("subscribe/{authorId}")]
-        public async Task<ActionResult<ApiResponse>> Subscribe(Guid authorId)
+        public async Task<ActionResult<ApiResponse>> Subscribe(string authorId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(authorId.ToString() ?? "");
-            if (authorIdRes == Guid.Empty) 
+            if (authorId == null) 
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_AUTHOR));
 
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (userIdRes == Guid.Empty) 
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdRes == null) 
                 return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             if (userIdRes == authorId)
@@ -43,14 +42,13 @@ namespace Blog_Application.Controllers
 
         // API to unsubscribe from an Author
         [HttpDelete("unsubscribe/{authorId}")]
-        public async Task<ActionResult<ApiResponse>> Unsubscribe(Guid authorId)
+        public async Task<ActionResult<ApiResponse>> Unsubscribe(string authorId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(authorId.ToString() ?? "");
-            if (authorIdRes == Guid.Empty)
+            if (authorId == null)
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_AUTHOR));
 
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (userIdRes == Guid.Empty) 
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdRes == null)
                 return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _userService.Unsubscribe(userIdRes, authorId);
@@ -61,12 +59,11 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.UNSUBSCRIBE_SUCCESS));
         }
 
-        // Getting the subscribers of the Author (Anyone can see the subscribers of an Author)
+        //// Getting the subscribers of the Author (Anyone can see the subscribers of an Author)
         [HttpGet("subscribers/{authorId}")]
-        public async Task<ActionResult<ApiResponse>> Subscribers(Guid authorId)
+        public async Task<ActionResult<ApiResponse>> Subscribers(string authorId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(authorId.ToString() ?? "");
-            if (authorIdRes == Guid.Empty)
+            if (authorId == null)
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_AUTHOR));
 
             var subscribers = await _userService.GetSubscribers(authorId);
@@ -76,13 +73,13 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.SUBSCRIBERS_FETCHED, subscribers));
         }
 
-        // Getting the subscriptions of the User (Only the User can see his subscriptions)
+        //// Getting the subscriptions of the User (Only the User can see his subscriptions)
         [HttpGet("subscriptions/{userId}")]
-        public async Task<ActionResult<ApiResponse>> Subscriptions(Guid userId)
+        public async Task<ActionResult<ApiResponse>> Subscriptions(string userId)
         {
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userIdRes == Guid.Empty || userIdRes != userId) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.SUBSCRIPTION_ACCESS_CONFLICT));
+            if (userIdRes == null || userIdRes != userId) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.SUBSCRIPTION_ACCESS_CONFLICT));
 
             var subscriptions = await _userService.GetSubscriptions(userId);
 
