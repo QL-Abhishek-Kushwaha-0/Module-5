@@ -19,6 +19,13 @@ namespace Blog_Application.Controllers
         }
 
         // API to Subscribe to an Author
+        /* 
+            <summary>
+                Subscribe to an Author
+            </summary>
+            <param name="authorId">The ID of the author to subscribe to</param>
+            <returns>Returns a success message if the subscription is successful</returns>
+         */
         [HttpPost("subscribe/{authorId}")]
         public async Task<ActionResult<ApiResponse>> Subscribe(string authorId)
         {
@@ -40,7 +47,15 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.SUBSCRIBE_SUCCESS));
         }
 
-        // API to unsubscribe from an Author
+     
+        // API to Unsubscribe to an Author
+        /*
+            <summary>
+                Unsubscribe from an Author
+            </summary>
+            <param name="authorId">The ID of the author to unsubscribe from</param>
+            <returns>Returns a success message if the unsubscription is successful</returns>
+         */
         [HttpDelete("unsubscribe/{authorId}")]
         public async Task<ActionResult<ApiResponse>> Unsubscribe(string authorId)
         {
@@ -59,7 +74,14 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.UNSUBSCRIBE_SUCCESS));
         }
 
-        //// Getting the subscribers of the Author (Anyone can see the subscribers of an Author)
+        // API to fetch the Subscribers of an Author
+        /* 
+            <summary>
+                Get the subscribers of an Author
+            </summary>
+            <param name="authorId">The ID of the author whose subscribers are to be fetched</param>
+            <returns>Returns a list of subscribers of the author</returns>
+         */
         [HttpGet("subscribers/{authorId}")]
         public async Task<ActionResult<ApiResponse>> Subscribers(string authorId)
         {
@@ -73,7 +95,17 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.SUBSCRIBERS_FETCHED, subscribers));
         }
 
-        //// Getting the subscriptions of the User (Only the User can see his subscriptions)
+        // API to fetch the subscriptions of a User
+        /* 
+            <summary>
+                Get the subscriptions of a User
+            </summary>
+            <param name="userId">The ID of the user whose subscriptions are to be fetched</param>
+            <returns>Returns a list of subscriptions of the user</returns>
+            <remarks>
+                    <para>Note: Only the user can see his subscriptions.</para>
+            </remarks>
+         */
         [HttpGet("subscriptions/{userId}")]
         public async Task<ActionResult<ApiResponse>> Subscriptions(string userId)
         {

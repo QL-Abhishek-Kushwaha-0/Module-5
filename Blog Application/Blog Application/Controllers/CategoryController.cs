@@ -21,8 +21,15 @@ namespace Blog_Application.Controllers
             _categoryService = categoryService;
         }
 
-        // API to get all Categories
 
+        // API to get all categories
+        /*
+            <summary>
+                Get all categories
+            </summary>
+            <param>None</param
+            <returns>Returns API Response containing Success, Status Code , Message and Categories data</returns>
+         */
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetAll()
         {
@@ -33,8 +40,14 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORIES_FETCHED, categories));
         }
 
-        // API to get a Specific Category
-
+        // API to get a specific category by ID
+        /*
+            <summary>
+                Get a specific category by its ID
+            </summary>
+            <param name="categoryId">The ID of the category</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Category data</returns>
+         */
         [HttpGet("{categoryId}")]
         public async Task<ActionResult<ApiResponse>> Get(string categoryId)
         {
@@ -45,7 +58,15 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_FETCHED, category));
         }
 
-        // API to create a category
+
+        // API to create a new category
+        /*
+            <summary>
+                Create a new category
+            </summary>
+            <param name="categoryDto">The details of the category to be created</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Categories data</returns>
+         */
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPost]
@@ -68,7 +89,19 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_CREATED, new { category_name = newCategory.Name, author_name = authorName }));
         }
 
-        // API to update Category
+        // API to update an existing category
+        /* 
+            <summary>
+                Update an existing category
+            </summary>
+            <param name="categoryDto">The updated details of the category</param>
+            <param name="categoryId">The ID of the category to be updated</param>
+            <returns>Returns API Response containing Success, Status Code , Message and updated Category data</returns>
+                <remarks>
+                    The category ID should be passed in the URL as a parameter.
+                    The updated details of the category should be passed in the request body.
+                </remarks>
+         */
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPut("{categoryId}")]
@@ -87,6 +120,16 @@ namespace Blog_Application.Controllers
         }
 
         // API to delte Category
+        /* 
+            <summary>
+                Delete a category
+            </summary>
+            <param name="categoryId">The ID of the category to be deleted</param>
+            <returns>Returns API Response containing Success, Status Code, Message</returns>
+                <remarks>
+                    The category ID should be passed in the URL as a parameter.
+                </remarks>
+         */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpDelete("{categoryId}")]
         public async Task<ActionResult<ApiResponse>> Delete(string categoryId)
