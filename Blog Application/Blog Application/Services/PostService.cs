@@ -1,12 +1,8 @@
 ﻿using Blog_Application.Data;
-using Blog_Application.DTO;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.DTO.ResponseDTOs;
 using Blog_Application.Helper;
 using Blog_Application.Models.Entities;
-using Blog_Application.Resources;
-using Blog_Application.Utils;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 
@@ -96,7 +92,10 @@ namespace Blog_Application.Services
 
             if (post.AuthorId != authorId) return "InvalidAuthor";
 
-            await _context.Posts.DeleteOneAsync(Builders<Post>.Filter.Eq(p => p.Id, postId));
+            await _context.Posts.DeleteOneAsync(p => p.Id == postId);
+
+            await _context.Likes.DeleteManyAsync(l => l.PostId == postId);          // Deletes all related likes from Likes
+            await _context.Comments.DeleteManyAsync(c => c.PostId == postId);    // Deletes all related comments from Comments
 
             return "Success";
         }

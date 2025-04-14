@@ -77,7 +77,7 @@ namespace Blog_Application.Services
 
             // Update the Category Name
             await _context.Categories.UpdateOneAsync(
-                c => c.Id == categoryId,
+                Builders<Category>.Filter.Eq(c => c.Id, categoryId),
                 Builders<Category>.Update.Set(c => c.Name, categoryDto.Name)
             );
 
@@ -96,7 +96,7 @@ namespace Blog_Application.Services
 
             if (authorId != category.AuthorId) return "Unauthorized";
 
-            await _context.Categories.DeleteOneAsync(Builders<Category>.Filter.Eq(c => c.Id, category.Id));
+            await _context.Categories.DeleteOneAsync(c => c.Id == category.Id);
 
             return "Success";
         }

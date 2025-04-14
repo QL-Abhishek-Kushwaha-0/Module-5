@@ -49,7 +49,7 @@ namespace Blog_Application.Services
 
             if (existingSubscription == null) return SubscribeResponse.NotYetSubscribed;
 
-            await _context.Subscriptions.DeleteOneAsync(Builders<Subscription>.Filter.Eq(s => s.Id, existingSubscription.Id));
+            await _context.Subscriptions.DeleteOneAsync(s => s.Id == existingSubscription.Id);
 
             return SubscribeResponse.Success;
         }

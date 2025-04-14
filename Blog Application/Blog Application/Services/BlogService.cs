@@ -50,7 +50,7 @@ namespace Blog_Application.Services
 
             if (existingLike == null) return LikeResponse.NotYetLiked;
 
-            await _context.Likes.DeleteOneAsync(Builders<Like>.Filter.Eq(l => l.Id, existingLike.Id));
+            await _context.Likes.DeleteOneAsync(l => l.Id == existingLike.Id);
 
             return LikeResponse.Success;
         }
@@ -85,7 +85,7 @@ namespace Blog_Application.Services
             if (comment.UserId != userId) return CommentResponse.Unauthorized;
 
             await _context.Comments
-                .DeleteOneAsync(Builders<Comment>.Filter.Eq(c => c.Id, commentId));
+                .DeleteOneAsync(c => c.Id == commentId);
 
             return CommentResponse.Success;
         }
