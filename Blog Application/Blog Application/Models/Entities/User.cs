@@ -17,5 +17,9 @@
 
         public ICollection<Category>? Categories { get; set; }
         public ICollection<Post>? Posts { get; set; }
+        public ICollection<Like>? Likes { get; set; }
+        public ICollection<Comment>? Comments { get; set; }
+        public ICollection<Subscription>? Subscribers { get; set; }
+        public ICollection<Subscription>? Subscriptions { get; set; }
     }
 }

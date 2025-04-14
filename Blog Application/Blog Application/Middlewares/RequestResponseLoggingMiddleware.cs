@@ -1,6 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Text.Json;
 using Blog_Application.DTO.LoggingDTOs;
+using Blog_Application.Models.Entities;
+using Microsoft.AspNetCore.Http;
 using Serilog;
 
 namespace Blog_Application.Middlewares
@@ -30,27 +33,34 @@ namespace Blog_Application.Middlewares
 
                 var responseDetails = await GetResponseDetails(context);        // Fetches the Response Details
 
-                requestDetails.User = context.User.Identity.IsAuthenticated ? context.User.Identity.Name: "Anonymous User (Not Logged In)";
+                requestDetails.User = context.User.Identity.IsAuthenticated ? context.User.Identity.Name : "Anonymous User (Not Logged In)";
+
                 var executionTime = stopwatch.Elapsed.TotalSeconds;             // Calculates the Time taken by Api form Request to Response
 
                 // Custom Logger (Serilog) to log the Information of API Request Response in a customized Format
-                Log.Information(@"                                              
-                    {Timestamp} | IP [{IpAddress}]
-                    {Url} ({Method})
-                    USER [{User}]
-                    REQUEST_HEADERS: {RequestHeaders}
-                    REQUEST BODY: {RequestBody}
-                    RESPONSE_HEADERS: {ResponseHeaders}
-                    RESPONSE BODY: {ResponseBody}
-                    STATUS_CODE ~ {StatusCode} | EXECUTION_TIME [{ExecutionTime} Seconds]",
-                    requestDetails.Timestamp, requestDetails.IpAddress, requestDetails.Url,
-                    requestDetails.Method, requestDetails.User, requestDetails.Headers, requestDetails.Body,
-                    responseDetails.Headers, responseDetails.Body, responseDetails.StatusCode, executionTime
-                );
+                var logMessage = $@"
+                    {requestDetails.Timestamp} | IP [{requestDetails.IpAddress}]
+                    {requestDetails.Url} ({requestDetails.Method})
+                    USER [{requestDetails.User}]
+                    REQUEST_HEADERS: {requestDetails.Headers}
+                    REQUEST BODY: {requestDetails.Body}
+                    RESPONSE_HEADERS: {responseDetails.Headers}
+                    RESPONSE BODY: {responseDetails.Body}
+                    STATUS_CODE ~ {responseDetails.StatusCode} | EXECUTION_TIME [{executionTime} Seconds]";
 
-                responseBodyMemoryStream.Seek(0, SeekOrigin.Begin);                         
+                // Logging based on Success or failure
+                if (responseDetails.StatusCode == 200)
+                {
+                    Log.Information(logMessage);
+                }
+                else
+                {
+                    Log.Error(logMessage);
+                }
+
+                responseBodyMemoryStream.Seek(0, SeekOrigin.Begin);
                 // Resetting the Response body to the original one
-                // THis is required as we reads the response using a "MemoryStream" 
+                // THis is required as we reads the response using a "MemoryStream" (Memory stream allows to read the stream multiple times)
                 // In case we send the response without rewiting the original one then the client would get a Empty Response body
                 await responseBodyMemoryStream.CopyToAsync(originalResponseBodyStream);
             }

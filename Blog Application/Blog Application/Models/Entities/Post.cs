@@ -14,5 +14,8 @@ namespace Blog_Application.Models.Entities
 
         public Guid AuthorId { get; set; }
         public User Author { get; set; }
+
+        public ICollection<Like>? Likes { get; set; }
+        public ICollection<Comment>? Comments { get; set; }
     }
 }
