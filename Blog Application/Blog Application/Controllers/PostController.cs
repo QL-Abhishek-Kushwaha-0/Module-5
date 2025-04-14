@@ -21,9 +21,16 @@ namespace Blog_Application.Controllers
             _postService = postService;
         }
 
-
-        // Api to get all Posts
-
+        // API to get all Published Posts
+        /*
+            <summary>
+                Get all posts
+            </summary>
+            <returns>Returns API Response containing Success, Status Code , Message and Posts data</returns>
+                <remarks>
+                    <para>Note: Only Published posts will be fetched.</para>
+                </remarks>
+        */
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetAll()
         {
@@ -34,8 +41,18 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
         }
 
-
-        // API to get the posts of a specific author
+        
+        // API to get all posts of an Author
+        /*
+            <summary>
+                Get all posts by a specific author
+            </summary>
+            <param name="authorId">The ID of the author</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Author's Posts data</returns>
+                <remarks>
+                    <para>Note: Only Authors can view their own posts and will contain unpublished Posts too.</para>
+                </remarks>
+        */
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpGet("users/{authorId:guid}")]
@@ -49,8 +66,17 @@ namespace Blog_Application.Controllers
         }
 
 
-        // Api to Fetch all the Posts Under a Specific Category
-
+        // API to get all posts
+        /*
+            <summary>
+                Get all posts under a specific category
+            </summary>
+            <param name="categoryId">The ID of the category from URL</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Category's Posts data</returns>
+            <remarks>
+                <para>Note: Only Published posts will be fetched.</para>
+            </remarks>
+        */
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<ApiResponse>> GetPosts(int categoryId)
         {
@@ -61,9 +87,14 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.POSTS_FETCHED, posts));
         }
 
-
-        // API to Get a specific post
-
+        // API to get a Post by its ID
+        /* 
+            <summary>
+                Get a specific post by its ID
+            </summary>
+            <param name="postId">The ID of the post</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Post data</returns>
+        */
         [HttpGet("{postId}")]
         public async Task<ActionResult<ApiResponse>> GetPost(int postId)
         {
@@ -76,7 +107,17 @@ namespace Blog_Application.Controllers
 
 
         // Api to update the post
-
+        /* 
+            <summary>
+                Update a specific post by its ID
+            </summary>
+            <param name="postId">The ID of the post</param>
+            <param name="postDto">The updated post details</param>
+            <returns>Returns API Response containing Success, Status Code, Message and Updated Post data</returns>
+                <remarks>
+                    <para>Note: Only the author of the post can update it.</para>
+                </remarks>
+         */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPut("{postId}")]
         public async Task<ActionResult<ApiResponse>> Update(PostDto postDto, int postId)
@@ -92,9 +133,18 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UPDATED, updatedPost));
         }
 
-
-        // API to upload the Image to Post
-
+        // API to upload an Image
+        /*
+            <summary>
+                Upload an image to a specific post by its ID
+            </summary>
+            <param name="postId">The ID of the post</param>
+            <param name="image">The image file to be uploaded</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Image URL</returns>
+                <remarks>
+                    <para>Note: Only the author of the post can upload an image.</para>
+                </remarks>
+         */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPatch("upload/image/{postId}")]
         public async Task<ActionResult<ApiResponse>> UploadImage(int postId, IFormFile image)
@@ -109,8 +159,18 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.IMAGE_UPLOADED, new { imageUrlRes }));
         }
 
-        // Api to Create a New Post
-
+        // API to Create a new Post
+        /* 
+            <summary>
+                Create a new post under a specific category
+            </summary>
+            <param name="categoryId">The ID of the category</param>
+            <param name="postDto">The details of the post to be created</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Created Post data</returns>
+                <remarks>
+                    <para>Note: Only Authors can create it.</para>
+                </remarks>
+         */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPost("category/{categoryId}")]
         public async Task<ActionResult<ApiResponse>> Create(int categoryId, PostDto postDto)
@@ -127,7 +187,16 @@ namespace Blog_Application.Controllers
         }
 
         // Api to publish a post
-
+        /*
+            <summary>
+                Publish a specific post by its ID
+            </summary>
+            <param name="postId">The ID of the post</param>
+            <returns>Returns API Response containing Success, Status Code and Published Message</returns>
+                <remarks>
+                    <para>Note: Only the author of the post can publish it.</para>
+                </remarks>
+         */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPatch("{postId}/publish")]
         public async Task<ActionResult<ApiResponse>> Publish(int postId)
@@ -147,7 +216,16 @@ namespace Blog_Application.Controllers
 
 
         // API to unpublish a post
-
+        /* 
+            <summary>
+                Unpublish a specific post by its ID
+            </summary>
+            <param name="postId">The ID of the post</param>
+            <returns>Returns API Response containing Success, Status Code and Unpublished Message</returns>
+                <remarks>
+                    <para>Note: Only the author of the post can unpublish it.</para>
+                </remarks>
+         */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPatch("{postId}/unpublish")]
         public async Task<ActionResult<ApiResponse>> Unpublish(int postId)
@@ -167,7 +245,16 @@ namespace Blog_Application.Controllers
 
 
         // API to delete a Post
-
+        /* 
+            <summary>
+                Delete a specific post by its ID
+            </summary>
+            <param name="postId">The ID of the post</param>
+            <returns>Returns API Response containing Success, Status Code and Deleted Message</returns>
+                <remarks>
+                    <para>Note: Only the author of the post can delete it.</para>
+                </remarks>
+         */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpDelete("{postId}")]
         public async Task<ActionResult<ApiResponse>> Delete(int postId)

@@ -17,6 +17,14 @@ namespace Blog_Application.Controllers
             _authService = authService;
         }
 
+        // API to Register a new user
+        /*
+            <summary>
+                Register a new user
+            </summary>
+            <param name="registerDto">The registration details</param>
+            <returns>Returns a success message and the registered user details</returns>
+         */
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
@@ -31,7 +39,14 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.USER_REGISTERED, registerResponse));
         }
 
-
+        // API to Login a user
+        /*
+            <summary>
+                Login a user
+            </summary>
+            <param name="loginDto">The login details</param>
+            <returns>Returns a success message and the logged-in user details</returns>
+         */
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
