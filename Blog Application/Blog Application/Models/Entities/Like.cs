@@ -1,11 +1,18 @@
-﻿namespace Blog_Application.Models.Entities
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+
+namespace Blog_Application.Models.Entities
 {
     public class Like   
     {
-        public int PostId { get; set; }
-        public Post Post { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; } = null!;
 
-        public Guid UserId { get; set; }
-        public User User { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string PostId { get; set; }
+
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string UserId { get; set; }
     }
 }

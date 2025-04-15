@@ -5,9 +5,9 @@ namespace Blog_Application.Services
 {
     public interface IUserService
     {
-        Task<SubscribeResponse> Subscribe(Guid userId, Guid authorId);
-        Task<SubscribeResponse> Unsubscribe(Guid userId, Guid authorId);
-        Task<List<SubscriberDto>> GetSubscribers(Guid authorId);
-        Task<List<SubscriptionDto>> GetSubscriptions(Guid userId);
+        Task<SubscribeResponse> Subscribe(string userId, string authorId);
+        Task<SubscribeResponse> Unsubscribe(string userId, string authorId);
+        Task<List<SubscriberDto>> GetSubscribers(string authorId);
+        Task<List<SubscriptionDto>> GetSubscriptions(string userId);
     }
 }

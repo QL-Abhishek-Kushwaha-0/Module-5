@@ -1,0 +1,58 @@
+1. MongoDB
+-----------------------
+	-> MongoDB is a NoSQL database that uses a document-oriented data model.
+	-> It stores data in flexible, JSON-like documents, which allows for dynamic schemas.
+	-> MongoDB is designed to handle large volumes of unstructured or semi-structured data.
+	-> It is known for its scalability, performance, and ease of use.
+
+	-> Using in .NET Web API
+		* Install NuGet Package -> MongoDB.Driver
+		* Setup MongoDbContext File -> Create a MongoDB client and Connect to the database
+
+	-> Why MongoDB ??
+		* Scalability: MongoDB can handle large amounts of data and can be easily scaled horizontally by adding more servers.
+		* Flexibility: MongoDB's document-oriented data model allows for flexible and dynamic schemas, making it easy to adapt to changing data requirements.
+		* Performance: MongoDB is designed for high performance, with features like in-memory storage and indexing to speed up data access.
+		* Rich Query Language: MongoDB supports a powerful query language that allows for complex queries and aggregations.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. Differences between MongoDB and SQL
+-----------------------------------------------
+	->						MongoDB	   																				  SQL
+	--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	-> Data Storage         * It stores data in collection of documents (BSON/JSON) format.							* It stores data in tables with rows and columns.
+							* Collection -> Table																	* Table -> Collection
+							* Document	 -> Row																		* Row	-> Document
+							* Field		 -> Column																	* Column -> Field
+
+	-> Schema				* It has a flexible schema, allowing for dynamic and unstructured data.					* It has a fixed schema, requiring a predefined structure (Table) for data storage.
+
+	-> Query Language		* Uses MongoDB Query Language with JSON-like syntax.									* It uses Structured Query Language (SQL) for querying data.
+
+	-> Transactions			* It supports multi-document transactions, but they are not as                          * It has strong support for ACID transactions, ensuring data integrity.    
+							  robust as SQL transactions.	
+
+	-> Scalability			* It is designed for horizontal scalability, allowing for easy distribution				* It is typically vertically scalable, requiring more powerful hardware to handle increased loads.
+							  of data across multiple servers.
+
+	-> Performance			* It is optimized for high performance with features like in-memory storage				* It can be slower for large datasets due to the overhead of joins and complex queries.
+							  and indexing.	
+
+	-> Use Cases			* It is ideal for applications with unstructured or semi-structured data,				* It is suitable for applications with structured data and complex relationships, such as financial systems,																													  ERP systems, and traditional business applications.
+							  such as content management systems, real-time analytics, and IoT applications.
+
+	-> Data Model			* It uses a document-oriented data model, allowing for flexible and dynamic schemas.	* It uses a relational data model with fixed schemas and relationships between tables.
+
+	-> Data Relationships	* It uses embedded documents and references to represent relationships between data.	* It uses foreign keys and joins to represent relationships between tables.
+
+	-> Data Integrity		* It provides eventual consistency and flexible data validation rules.					* It enforces strong data integrity through ACID transactions and constraints.
+
+	-> Indexing				* It supports various indexing options, including single-field,							* It supports indexing on columns to improve query performance.
+							  compound indexes, and geospatial indexes.
+
+	-> Data Retrieval		* It retrieves data using a flexible query language with support for JSON-like queries.	* It retrieves data using SQL queries with joins and aggregations.
+
+	-> Data Types			* It supports a wide range of data types, including arrays, embedded documents.			* It has a fixed set of data types, such as integers, strings, and dates.
+
+	-> Replication			* It supports replica sets for high availability and data redundancy.					* It supports various replication methods, including master-slave and multi-master replication.
+	

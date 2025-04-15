@@ -49,7 +49,7 @@ namespace Blog_Application.Controllers
             <returns>Returns API Response containing Success, Status Code , Message and Category data</returns>
          */
         [HttpGet("{categoryId}")]
-        public async Task<ActionResult<ApiResponse>> Get(int categoryId)
+        public async Task<ActionResult<ApiResponse>> Get(string categoryId)
         {
             var category = await _categoryService.GetCategoryById(categoryId);
 
@@ -73,9 +73,9 @@ namespace Blog_Application.Controllers
         public async Task<ActionResult<ApiResponse>> Create(CategoryDto categoryDto)
         {
 
-            var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            
-            if (authorIdRes == Guid.Empty)
+            var authorIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (authorIdRes == null)
             {
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             }
@@ -105,11 +105,11 @@ namespace Blog_Application.Controllers
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPut("{categoryId}")]
-        public async Task<ActionResult<ApiResponse>> Update(CategoryDto categoryDto, int categoryId)
+        public async Task<ActionResult<ApiResponse>> Update(CategoryDto categoryDto, string categoryId)
         {
 
-            var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (authorIdRes == Guid.Empty)
+            var authorIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (authorIdRes == null)
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
 
             var updatedCategory = await _categoryService.UpdateCategory(categoryDto, categoryId, authorIdRes);
@@ -132,10 +132,10 @@ namespace Blog_Application.Controllers
          */
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpDelete("{categoryId}")]
-        public async Task<ActionResult<ApiResponse>> Delete(int categoryId)
+        public async Task<ActionResult<ApiResponse>> Delete(string categoryId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (authorIdRes == Guid.Empty)
+            var authorIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (authorIdRes == null)
             {
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_GUID));
             }
@@ -143,6 +143,7 @@ namespace Blog_Application.Controllers
             var res = await _categoryService.DeleteCategory(categoryId, authorIdRes);
 
             if (res.Equals("NoCategoryFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_CATEGORY));
+            if (res.Equals("PostExists")) return Conflict(new ApiResponse(false, 409, ResponseMessages.HAVE_POSTS_CONFLICT));
             if (res.Equals("Unauthorized")) return Conflict(new ApiResponse(false, 409, ResponseMessages.CATEGORY_CONFLICT));
 
             return Ok(new ApiResponse(true, 200, ResponseMessages.CATEGORY_DELETE));

@@ -1,29 +1,32 @@
 ﻿using Blog_Application.Data;
+using Blog_Application.DTO;
 using Blog_Application.DTO.ResponseDTOs;
 using Blog_Application.Enums;
+using Blog_Application.Helper;
 using Blog_Application.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace Blog_Application.Services
 {
     public class UserService : IUserService
     {
-        private readonly ApplicationDbContext _context;
-        public UserService(ApplicationDbContext context)
+        private readonly MongoDbContext _context;
+        public UserService(MongoDbContext context)
         {
             _context = context;
         }
 
-        public async Task<SubscribeResponse> Subscribe(Guid userId, Guid authorId)
+        public async Task<SubscribeResponse> Subscribe(string userId, string authorId)
         {
-            var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
+            var author = await _context.Users.Find(u => u.Id == authorId && u.Role == UserRole.Author).FirstOrDefaultAsync();
             if (author == null)
             {
                 return SubscribeResponse.InvalidAuthor;
             }
 
             var existingSubscription = await _context.Subscriptions
-                .FirstOrDefaultAsync(s => s.UserId == userId && s.AuthorId == authorId);
+                .Find(s => s.UserId == userId && s.AuthorId == authorId).FirstOrDefaultAsync();
 
             if (existingSubscription != null)
             {
@@ -31,63 +34,74 @@ namespace Blog_Application.Services
             }
 
             var subscription = new Subscription { UserId = userId, AuthorId = authorId };
-            _context.Subscriptions.Add(subscription);
-            await _context.SaveChangesAsync();
+            await _context.Subscriptions.InsertOneAsync(subscription);
 
             return SubscribeResponse.Success;
         }
 
-        public async Task<SubscribeResponse> Unsubscribe(Guid userId, Guid authorId)
+        public async Task<SubscribeResponse> Unsubscribe(string userId, string authorId)
         {
-            var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
+            var author = await _context.Users.Find(u => u.Id == authorId && u.Role == UserRole.Author).FirstOrDefaultAsync();
 
             if (author == null) return SubscribeResponse.InvalidAuthor;
 
-            var existingSubscription = await _context.Subscriptions.FirstOrDefaultAsync(s => s.AuthorId == authorId && s.UserId == userId);
+            var existingSubscription = await _context.Subscriptions.Find(s => s.AuthorId == authorId && s.UserId == userId).FirstOrDefaultAsync();
 
             if (existingSubscription == null) return SubscribeResponse.NotYetSubscribed;
 
-            _context.Subscriptions.Remove(existingSubscription);
-            await _context.SaveChangesAsync();
+            await _context.Subscriptions.DeleteOneAsync(s => s.Id == existingSubscription.Id);
 
             return SubscribeResponse.Success;
         }
 
-        public async Task<List<SubscriberDto>> GetSubscribers(Guid authorId)
+        public async Task<List<SubscriberDto>> GetSubscribers(string authorId)
         {
-            var author = await _context.Users.FirstOrDefaultAsync(u => u.Id == authorId && u.Role == UserRole.Author);
+            var author = await _context.Users.Find(u => u.Id == authorId && u.Role == UserRole.Author).FirstOrDefaultAsync();
 
             if (author == null) return null;
 
             var subscribers = await _context.Subscriptions
-                .Where(s => s.AuthorId == authorId)
-                .Include(s => s.User)
-                .Select(s => new SubscriberDto
+                .Aggregate()
+                .Match(s => s.AuthorId == authorId)
+                .Lookup<Subscription, User, LookupClasses.SubscribersAndSubscriptionLookup>(
+                    _context.Users,
+                    s => s.UserId,
+                    u => u.Id,
+                    res => res.Subscriber
+                )
+                .Project(s => new SubscriberDto
                 {
-                    UserId = s.UserId,
-                    Username = s.User.Name
+                    UserId = s.Subscriber!.FirstOrDefault()!.Id,
+                    Username = s.Subscriber!.FirstOrDefault()!.Name
                 })
                 .ToListAsync();
 
             return subscribers;
         }
 
-        public async Task<List<SubscriptionDto>> GetSubscriptions(Guid userId)
+        public async Task<List<SubscriptionDto>> GetSubscriptions(string userId)
         {
             var user = await _context.Users
-                .Include(a => a.Subscriptions!)
-                .ThenInclude(s => s.Author)
-                .FirstOrDefaultAsync(u => u.Id == userId);
+                .Find(u => u.Id == userId)
+                .FirstOrDefaultAsync();
 
             if (user == null) return null;
 
-            var subscriptions = user.Subscriptions!
-                .Select(s => new SubscriptionDto
+            var subscriptions = await _context.Subscriptions
+                .Aggregate()
+                .Match(s => s.UserId == userId)
+                .Lookup<Subscription, User, LookupClasses.SubscribersAndSubscriptionLookup>(
+                    _context.Users,
+                    s => s.AuthorId,
+                    u => u.Id,
+                    res => res.Subscriptions
+                )
+                .Project(s => new SubscriptionDto
                 {
-                    Id = s.Author.Id,
-                    Author = s.Author.Name
+                    Id = s.Subscriptions!.FirstOrDefault()!.Id,
+                    Author = s.Subscriptions!.FirstOrDefault()!.Name
                 })
-                .ToList();
+                .ToListAsync();
 
             return subscriptions;
         }

@@ -27,14 +27,13 @@ namespace Blog_Application.Controllers
             <returns>Returns a success message if the subscription is successful</returns>
          */
         [HttpPost("subscribe/{authorId}")]
-        public async Task<ActionResult<ApiResponse>> Subscribe(Guid authorId)
+        public async Task<ActionResult<ApiResponse>> Subscribe(string authorId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(authorId.ToString() ?? "");
-            if (authorIdRes == Guid.Empty) 
+            if (authorId == null) 
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_AUTHOR));
 
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (userIdRes == Guid.Empty) 
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdRes == null) 
                 return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             if (userIdRes == authorId)
@@ -58,14 +57,13 @@ namespace Blog_Application.Controllers
             <returns>Returns a success message if the unsubscription is successful</returns>
          */
         [HttpDelete("unsubscribe/{authorId}")]
-        public async Task<ActionResult<ApiResponse>> Unsubscribe(Guid authorId)
+        public async Task<ActionResult<ApiResponse>> Unsubscribe(string authorId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(authorId.ToString() ?? "");
-            if (authorIdRes == Guid.Empty)
+            if (authorId == null)
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_AUTHOR));
 
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            if (userIdRes == Guid.Empty) 
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdRes == null)
                 return Unauthorized(new ApiResponse(false, 401, ResponseMessages.LOGIN_TO_INTERACT));
 
             var result = await _userService.Unsubscribe(userIdRes, authorId);
@@ -85,10 +83,9 @@ namespace Blog_Application.Controllers
             <returns>Returns a list of subscribers of the author</returns>
          */
         [HttpGet("subscribers/{authorId}")]
-        public async Task<ActionResult<ApiResponse>> Subscribers(Guid authorId)
+        public async Task<ActionResult<ApiResponse>> Subscribers(string authorId)
         {
-            var authorIdRes = HelperFunctions.GetGuid(authorId.ToString() ?? "");
-            if (authorIdRes == Guid.Empty)
+            if (authorId == null)
                 return BadRequest(new ApiResponse(false, 400, ResponseMessages.INVALID_AUTHOR));
 
             var subscribers = await _userService.GetSubscribers(authorId);
@@ -110,11 +107,11 @@ namespace Blog_Application.Controllers
             </remarks>
          */
         [HttpGet("subscriptions/{userId}")]
-        public async Task<ActionResult<ApiResponse>> Subscriptions(Guid userId)
+        public async Task<ActionResult<ApiResponse>> Subscriptions(string userId)
         {
-            var userIdRes = HelperFunctions.GetGuid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+            var userIdRes = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userIdRes == Guid.Empty || userIdRes != userId) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.SUBSCRIPTION_ACCESS_CONFLICT));
+            if (userIdRes == null || userIdRes != userId) return Unauthorized(new ApiResponse(false, 401, ResponseMessages.SUBSCRIPTION_ACCESS_CONFLICT));
 
             var subscriptions = await _userService.GetSubscriptions(userId);
 

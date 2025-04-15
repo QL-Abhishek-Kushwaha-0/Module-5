@@ -1,25 +1,21 @@
 ﻿using Blog_Application.Middlewares;
 using Serilog;
 using Serilog.Events;
-using Blog_Application.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Blog_Application.Utils;
 using Blog_Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Blog_Application.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Getting Connection String
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.Configure<MongoDbSettings>(
+    builder.Configuration.GetSection("MongoDbSettings")
+);
 
-// Database Connection
-builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseSqlServer(connectionString));
-
-//Console.WriteLine($"Connection String: {connectionString}");
+builder.Services.AddSingleton<MongoDbContext>();
 
 // Serilog Configuration
 builder.Host.UseSerilog((context, services, config) =>
@@ -105,10 +101,10 @@ var app = builder.Build();
 
 app.UseStaticFiles();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();               // Middleware for Handling the Exceptions
-app.UseMiddleware<AuthorizationMiddleware>();
-app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware for Logging the Request Response  
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();       
+app.UseMiddleware<AuthorizationMiddleware>();             
+app.UseMiddleware<RequestResponseLoggingMiddleware>();    
+                                                          
 
 app.UseHttpsRedirection();
 

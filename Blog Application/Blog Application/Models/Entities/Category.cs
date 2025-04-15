@@ -1,13 +1,16 @@
-﻿namespace Blog_Application.Models.Entities
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+
+namespace Blog_Application.Models.Entities
 {
     public class Category
     {
-        public int Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public string Name { get; set; }
 
-        public Guid AuthorId { get; set; }
-        public User Author { get; set; }
-
-        public ICollection<Post>? Posts { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string AuthorId { get; set; }
     }
 }

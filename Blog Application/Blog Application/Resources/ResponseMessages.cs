@@ -58,6 +58,7 @@
         public const string COMMENT_CONFLICT = "Cannot Delete Comment posted by others!!!!";
         public const string COMMENTS_FETCHED = "Comments Fetched Successfully...";
         public const string COMMENTS_NOT_FOUND = "No Comments Found for this Post!!!";
+        public const string NO_COMMENTS = "There are no comments for this post yet!!!";
 
 
         // Subscription Related Messages
@@ -90,5 +91,7 @@
         public const string INVALID_PASSWORD = "Password should be at least 8 characters long!!!";
         public const string INVALID_URL = "Invalid URL!!!";
 
+        // Enforcing Heirarchical Relationship in Models
+        public const string HAVE_POSTS_CONFLICT = "Category cannot be deleted as there are posts associated with it!!!!";
     }
 }

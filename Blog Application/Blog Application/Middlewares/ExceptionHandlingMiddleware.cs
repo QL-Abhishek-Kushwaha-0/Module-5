@@ -22,7 +22,7 @@ namespace Blog_Application.Middlewares
             }
             catch (Exception ex)
             {
-                //Log.Error($"Exception: {ex.Message}");
+                Log.Error($"Exception: {ex}");
                 await HandleExceptionAsync(context, ex);
             }
         }

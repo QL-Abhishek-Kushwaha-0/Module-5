@@ -6,10 +6,10 @@ namespace Blog_Application.Services
 {
     public interface IBlogService
     {
-        Task<LikeResponse> LikePost(int postId, Guid userId);
-        Task<LikeResponse> UnlikePost(int postId, Guid userId);
-        Task<CommentResponseDto> Comment(int postId, Guid userId, CommentDto commentDto);
-        Task<CommentResponse> DeleteComment(int postId, int commentId, Guid authorId);
-        Task<List<CommentResponseDto>> GetPostComments(int postId);
+        Task<LikeResponse> LikePost(string postId, string userId);
+        Task<LikeResponse> UnlikePost(string postId, string userId);
+        Task<CommentResponseDto> Comment(string postId, string userId, CommentDto commentDto);
+        Task<CommentResponse> DeleteComment(string postId, string commentId, string authorId);
+        Task<List<CommentResponseDto>> GetPostComments(string postId);
     }
 }

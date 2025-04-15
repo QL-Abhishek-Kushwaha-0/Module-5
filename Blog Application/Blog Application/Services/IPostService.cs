@@ -6,18 +6,15 @@ namespace Blog_Application.Services
 {
     public interface IPostService
     {
+        Task<PostResponseDto> CreatePost(string categoryId, PostDto postDto, string authorId);
+        Task<PostResponseDto> GetPostById(string postId);
+        Task<PostResponseDto> UpdatePost(PostDto postDto, string postId, string authorId);
+        Task<string> DeletePost(string postId, string authorId);
+        Task<string> UploadImage(string postId, IFormFile image, HttpRequest request);
+        Task<string> PublishPost(string postId, string authorId);
+        Task<string> UnpublishPost(string postId, string authorId);
         Task<List<PostResponseDto>> GetAllPosts();
-        Task<List<PostResponseDto>> GetAuthorPosts(Guid authorId);
-        Task<List<PostResponseDto>> GetCategoryPosts(int categoryId);
-        Task<PostResponseDto> GetPostById(int postId);
-        Task<PostResponseDto> CreatePost(int categoryId, PostDto postDto, Guid authorId);
-
-        Task<PostResponseDto> UpdatePost(PostDto postDto, int postId, Guid authorId);
-
-        Task<string> UploadImage(int postId, IFormFile image, HttpRequest request);
-
-        Task<string> PublishPost(int postId, Guid authorId);
-        Task<string> UnpublishPost(int postId, Guid authorId);
-        Task<string> DeletePost(int postId, Guid authorId);
+        Task<List<PostResponseDto>> GetAuthorPosts(string authorId);
+        Task<List<PostResponseDto>> GetCategoryPosts(string categoryId);
     }
 }
