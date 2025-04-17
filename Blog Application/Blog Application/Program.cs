@@ -66,9 +66,13 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware for Logging the Request Response  
-app.UseMiddleware<AuthorizationMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();               // Middleware for Handling the Exceptions
+
+app.UseStaticFiles();
+
+app.UseMiddleware<AuthorizationMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware for Logging the Request Response  
+
 
 app.UseHttpsRedirection();
 

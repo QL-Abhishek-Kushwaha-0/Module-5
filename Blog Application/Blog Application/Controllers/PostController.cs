@@ -16,10 +16,12 @@ namespace Blog_Application.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
+        private readonly S3Service _s3Service;
 
-        public PostController(IPostService postService)
+        public PostController(IPostService postService, S3Service s3Service)
         {
             _postService = postService;
+            _s3Service = s3Service;
         }
 
 
@@ -74,7 +76,45 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UPDATED, updatedPost));
         }
 
-        // Api to Create a New Post
+        //API to Generate a PreSigned Image fro S3
+
+        [HttpGet("generate-presigned-url")]
+        public IActionResult GeneratePresignedUrl(string fileName)
+        {
+            if (fileName == null || fileName.Length == 0) return BadRequest(new ApiResponse(false, 400, "No image uploaded!!!!"));
+
+            var imagePath = Guid.NewGuid().ToString() + fileName;
+
+            var preSignedUrl = _s3Service.GeneratePreSignedUrl(imagePath, 15);
+
+            return Ok(new ApiResponse(true, 200, "PreSigned Url generated Successfully!!!", preSignedUrl));
+        }
+
+        // API to upload an Image
+        /*
+            <summary>
+                Upload an image to a specific post by its ID
+            </summary>
+            <param name="postId">The ID of the post</param>
+            <param name="image">The image file to be uploaded</param>
+            <returns>Returns API Response containing Success, Status Code , Message and Image URL</returns>
+                <remarks>
+                    <para>Note: Only the author of the post can upload an image.</para>
+                </remarks>
+         */
+        [Authorize(Roles = nameof(UserRole.Author))]
+        [HttpPatch("upload/image/{postId}")]
+        public async Task<ActionResult<ApiResponse>> UploadImage(int postId, IFormFile image)
+        {
+            if (image == null || image.Length == 0) return BadRequest(new ApiResponse(false, 400, ResponseMessages.NO_IMAGE));
+
+            var imageUrlRes = await _postService.UploadImage(postId, image, Request);
+
+            if (imageUrlRes.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
+            if (imageUrlRes.Equals("InvalidImage")) return Conflict(new ApiResponse(false, 409, ResponseMessages.INVALID_IMAGE));
+
+            return Ok(new ApiResponse(true, 200, ResponseMessages.IMAGE_UPLOADED, new { imageUrlRes }));
+        }
 
         [Authorize(Roles = nameof(UserRole.Author))]
         [HttpPost("category/{categoryId}")]

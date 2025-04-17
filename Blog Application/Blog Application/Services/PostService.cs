@@ -9,9 +9,11 @@ namespace Blog_Application.Services
     public class PostService : IPostService
     {
         private readonly ApplicationDbContext _context;
-        public PostService(ApplicationDbContext context)
+        private readonly S3Service _s3Service;
+        public PostService(ApplicationDbContext context, S3Service s3Service)
         {
             _context = context;
+            _s3Service = s3Service;
         }
 
         public async Task<List<PostResponseDto>> GetCategoryPosts(int categoryId)
@@ -93,6 +95,23 @@ namespace Blog_Application.Services
             };
 
             return postRes;
+        }
+
+        public async Task<string> UploadImage(int postId, IFormFile image, HttpRequest request)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null) return "NoPostFound";
+
+            var fileName = await HelperFunctions.GetFileName(image, _s3Service);    // Will upload the image to images folder and return the name of the stored image
+
+            if (fileName.Equals("InvalidImage")) return fileName;
+
+            post.ImageUrl = fileName;
+
+            await _context.SaveChangesAsync();
+
+            return fileName;
         }
 
         public async Task<PostResponseDto> CreatePost(int categoryId, PostDto postDto, Guid authorId)
