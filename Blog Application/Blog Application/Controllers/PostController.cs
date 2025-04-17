@@ -175,14 +175,6 @@ namespace Blog_Application.Controllers
             return Ok(new ApiResponse(true, 200, ResponseMessages.IMAGE_UPLOADED, new { imageUrlRes }));
         }
 
-            var imageUrlRes = await _postService.UploadImage(postId, image, Request);
-
-            if (imageUrlRes.Equals("NoPostFound")) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
-            if (imageUrlRes.Equals("InvalidImage")) return Conflict(new ApiResponse(false, 409, ResponseMessages.INVALID_IMAGE));
-
-            return Ok(new ApiResponse(true, 200, ResponseMessages.IMAGE_UPLOADED, new { imageUrlRes }));
-        }
-
         // API to Create a new Post
         /* 
             <summary>

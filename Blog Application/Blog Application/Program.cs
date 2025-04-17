@@ -92,6 +92,8 @@ builder.Services.AddControllers()
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSingleton<S3Service>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IPostService, PostService>();
