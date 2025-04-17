@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Blog_Application.Utils;
 using Blog_Application.Resources;
 
 namespace Blog_Application.Middlewares
@@ -25,10 +26,10 @@ namespace Blog_Application.Middlewares
             if (hasAuthorizeAttribute)
             {
 
-                if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
-                {
-                    await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, "Please login first!!!!"));
-                }
+            if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+            {
+                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, ResponseMessages.INVALID_LOGIN));
+            }
 
                 if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
                 {

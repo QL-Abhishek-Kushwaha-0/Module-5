@@ -1,7 +1,10 @@
 ﻿using Blog_Application.Data;
 using Blog_Application.DTO.RequestDTOs;
 using Blog_Application.DTO.ResponseDTOs;
+using Blog_Application.Helper;
 using Blog_Application.Models.Entities;
+using Blog_Application.Resources;
+using Blog_Application.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog_Application.Services
@@ -52,6 +55,24 @@ namespace Blog_Application.Services
                 })
                 .ToListAsync();
             return posts;
+        }
+
+        public async Task<List<PostResponseDto>> GetAuthorPosts(Guid authorId)
+        {
+            var user = await _context.Users.Include(a => a.Posts!).ThenInclude(c => c.Category).FirstOrDefaultAsync(a => a.Id == authorId);
+
+            if (user == null) return new List<PostResponseDto>();
+
+            var postList = user.Posts!.Select(p => new PostResponseDto
+            {
+                Title = p.Title,
+                Description = p.Description,
+                ImageUrl = p.ImageUrl ?? "",
+                Category = p.Category != null ? p.Category.Name : "Other",
+                Author = user.Name
+            }).ToList();
+
+            return postList;
         }
 
         public async Task<PostResponseDto> GetPostById(int postId)
