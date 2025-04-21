@@ -92,6 +92,8 @@ builder.Services.AddControllers()
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSingleton<S3Service>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IPostService, PostService>();
@@ -103,12 +105,9 @@ builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
-app.UseStaticFiles();
-
-app.UseMiddleware<ExceptionHandlingMiddleware>();               // Middleware for Handling the Exceptions
-app.UseMiddleware<AuthorizationMiddleware>();
 app.UseMiddleware<RequestResponseLoggingMiddleware>();          // Middleware for Logging the Request Response  
-
+app.UseMiddleware<AuthorizationMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();               // Middleware for Handling the Exceptions
 
 app.UseHttpsRedirection();
 

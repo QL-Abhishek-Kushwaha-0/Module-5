@@ -29,6 +29,13 @@ namespace Blog_Application.Middlewares
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
+            if (context.Response.HasStarted)
+            {
+                Log.Warning("The response has already started, cannot modify the status code or write the error response.");
+                return;
+            }
+
+            context.Response.Clear();  // Clear any partially written response
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;  
             context.Response.ContentType = "application/json";
 

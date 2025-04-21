@@ -15,10 +15,12 @@ namespace Blog_Application.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
+        private readonly S3Service _s3Service;
 
-        public PostController(IPostService postService)
+        public PostController(IPostService postService, S3Service s3Service)
         {
             _postService = postService;
+            _s3Service = s3Service;
         }
 
         // API to get all Published Posts
@@ -131,6 +133,20 @@ namespace Blog_Application.Controllers
             if (updatedPost == null) return NotFound(new ApiResponse(false, 404, ResponseMessages.NO_POST));
 
             return Ok(new ApiResponse(true, 200, ResponseMessages.POST_UPDATED, updatedPost));
+        }
+
+        //API to Generate a PreSigned Image fro S3
+
+        [HttpGet("generate-presigned-url")]
+        public IActionResult GeneratePresignedUrl(string fileName)
+        {
+            if (fileName == null || fileName.Length == 0) return BadRequest(new ApiResponse(false, 400, "No image uploaded!!!!"));
+
+            var imagePath = Guid.NewGuid().ToString() + fileName;
+
+            var preSignedUrl = _s3Service.GeneratePreSignedUrl(imagePath, 15);
+
+            return Ok(new ApiResponse(true, 200, "PreSigned Url generated Successfully!!!", preSignedUrl));
         }
 
         // API to upload an Image

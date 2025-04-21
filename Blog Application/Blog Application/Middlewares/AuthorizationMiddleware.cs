@@ -19,15 +19,17 @@ namespace Blog_Application.Middlewares
             var endpoint = context.GetEndpoint();
             var hasAuthorizeAttribute = endpoint?.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>() != null;
 
+            if (!hasAuthorizeAttribute || context.Response.HasStarted)
+                return;
 
             // Run middleware logic only if the endpoint has [Authorize] attribute
             if (hasAuthorizeAttribute)
             {
 
-                if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
-                {
-                    await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, "Please login first!!!!"));
-                }
+            if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+            {
+                await context.Response.WriteAsJsonAsync(new ApiResponse(false, 401, ResponseMessages.INVALID_LOGIN));
+            }
 
                 if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
                 {
